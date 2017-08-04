@@ -54,8 +54,9 @@ std::istream &operator >> (std::istream &instr, DumbMap &m) {
         }
     }
     while (true) {
-        instr >> r >> s;
-        if (r != "end" && s != "end") {
+        instr >> r;
+        if (r != "end") {
+            instr >> s;
             boost::add_edge(vertices_by_name[r], vertices_by_name[s], 1, m.g);
         } else {
             break;
