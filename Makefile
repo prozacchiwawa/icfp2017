@@ -8,7 +8,7 @@ CC=gcc #clang-3.9
 CXX=g++ #clang++-3.9
 B64=base64/base64.o
 
-all: bin/main bin/graphio bin/test_score_eval bin/testgame
+all: bin/main bin/graphio bin/test_score_eval bin/testgame bin/moveio
 
 %.o:: %.c
 	gcc -g -c -o $@ $<
@@ -23,6 +23,9 @@ bin/main: src/main.o src/*.cpp $(OBJS) $(HDRS) bin
 
 bin/graphio: test/graphio.cpp $(HDRS)
 	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $<
+
+bin/moveio: test/moveio.cpp $(HDRS)
+	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(OBJS)
 
 bin/test_score_eval: test/test_score_eval.cpp src/score_eval.o $(HDRS)
 	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(OBJS)

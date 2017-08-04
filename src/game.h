@@ -4,6 +4,8 @@
 #include <iostream>
 #include <algorithm>
 
+#include "ourgraph.h"
+
 extern "C" {
     #include "base64.h"
 }
@@ -158,6 +160,13 @@ std::istream &operator >> (std::istream &instr, Moves &m) {
         }
     }
     return instr;
+}
+
+std::ostream &operator << (std::ostream &oustr, Moves &m) {
+    for (auto it : m) {
+        oustr << it << "\n";
+    }
+    return oustr;
 }
 
 std::istream &operator >> (std::istream &instr, OurState &s) {
