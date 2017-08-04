@@ -3,6 +3,7 @@
 #include <memory>
 #include <iostream>
 #include <exception>
+#include <sstream>
 
 #include "ourgraph.h"
 
@@ -69,10 +70,12 @@ struct ClaimMove {
 std::istream &operator >> (std::istream &instr, ClaimMove &m) {
     instr >> m.source;
     instr >> m.target;
+    return instr;
 }
 
 std::ostream &operator << (std::ostream &oustr, const ClaimMove &m) {
     oustr << m.source << " " << m.target;
+    return oustr;
 }
 
 struct Move {
