@@ -1,10 +1,17 @@
 SRCS=$(wildcard src/*.cpp)
-OBJS=$(subst .cpp,.o,$(SRCS))
+CSRC=base64/base64.c
+OBJS=$(subst .cpp,.o,$(SRCS)) $(subst .c,.o,$(CSRC))
 
 all: bin/main
 
-bin/main: bin src/*.cpp
-	clang -std=c++11 -o $@ -g -lstdc++ $(SRCS)
+%.o: %.c
+	gcc -g -c -o $@ $<
+
+%.o: %.cpp
+	g++ -I./base64 -std=c++1z -g -c -o $@ $<
+
+bin/main: bin src/*.cpp $(OBJS)
+	g++ -I./base64 -std=c++1z -o $@ -g -lstdc++ $(OBJS)
 
 bin:
 	mkdir -p bin
