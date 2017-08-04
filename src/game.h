@@ -64,7 +64,7 @@ struct Opening {
     Move move;
 };
 
-using Moves = std::set<Move>;
+using Moves = std::vector<Move>;
 
 struct OurState {
     OpeningSetup setup;
@@ -154,7 +154,7 @@ std::istream &operator >> (std::istream &instr, Moves &m) {
         try {
             Move mv;
             instr >> mv;
-            m.insert(mv);
+            m.push_back(mv);
         } catch (...) {
             break;
         }
