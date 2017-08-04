@@ -6,7 +6,7 @@
 #include "boost/graph/topological_sort.hpp"
 
 using PID = int;
-using SID = std::string;
+using SID = int;
 using vecS = boost::vecS;
 using bidirectionalS = boost::bidirectionalS;
 using Weight = int;
@@ -15,6 +15,20 @@ using Vertex = boost::graph_traits < Graph >::vertex_descriptor;
 
 struct DumbMap {
     Graph g;
+
+    std::vector<std::pair<SID, SID> > getEdges() const {
+        std::vector<std::pair<SID, SID> > edges;
+        boost::graph_traits<Graph>::vertex_iterator v, v_end;
+        for (boost::tie(v, v_end) = boost::vertices(g); v != v_end; ++v) {
+            boost::graph_traits<Graph>::out_edge_iterator e, e_end;
+            for (boost::tie(e, e_end) = boost::out_edges(*v, g); e != e_end; ++e) {
+                auto vs1 = boost::source(*e, g);
+                auto vs2 = boost::target(*e, g);
+                edges.push_back(std::make_pair(vs1, vs2));
+            }
+        }
+        return edges;
+    }
 };
 
 namespace {
@@ -25,8 +39,11 @@ std::istream &operator >> (std::istream &instr, DumbMap &m) {
     while (true) {
         instr >> r;
         if (r != "end") {
-            auto v = boost::add_vertex(r, m.g);
-            vertices_by_name[r] = v;
+            std::istringstream iss(r);
+            int n;
+            iss >> n;
+            auto v = boost::add_vertex(n, m.g);
+            vertices_by_name[n] = v;
         } else {
             break;
         }
@@ -34,8 +51,15 @@ std::istream &operator >> (std::istream &instr, DumbMap &m) {
     while (true) {
         instr >> r;
         if (r != "end") {
+            std::istringstream iss_r(r);
+            int nn;
+            iss_r >> nn;
             instr >> s;
-            boost::add_edge(vertices_by_name[r], vertices_by_name[s], 1, m.g);
+            int mm;
+            std::istringstream iss_s(s);
+            int s;
+            iss_s >> mm;
+            boost::add_edge(vertices_by_name[nn], vertices_by_name[mm], 1, m.g);
         } else {
             break;
         };

@@ -6,8 +6,9 @@ MAINS=src/main.o test/test_score_eval.o
 OBJS=$(filter-out $(MAINS),$(ALL_OBJS)) # remove objs with a "main"
 CC=gcc #clang-3.9
 CXX=g++ #clang++-3.9
+B64=base64/base64.o
 
-all: bin/main bin/graphio bin/test_score_eval
+all: bin/main bin/graphio bin/test_score_eval bin/testgame
 
 %.o:: %.c
 	gcc -g -c -o $@ $<
@@ -25,6 +26,9 @@ bin/graphio: test/graphio.cpp $(HDRS)
 
 bin/test_score_eval: test/test_score_eval.cpp src/score_eval.o $(HDRS)
 	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(OBJS)
+
+bin/testgame: test/testgame.cpp $(HDRS)
+	g++ -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(B64)
 
 bin:
 	mkdir -p bin
