@@ -16,7 +16,7 @@
  
 int main(int, char *[])
 {
- 
+#if 0 
   // Create a graph
   Graph g;
  
@@ -52,7 +52,7 @@ int main(int, char *[])
 
   uint64_t score = score_player_map(g, std::set(v0));
   std::cout << "Score: " << score << std::endl;
-   
+#endif   
   return EXIT_SUCCESS;
 }
  

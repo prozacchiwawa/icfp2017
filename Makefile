@@ -1,19 +1,22 @@
 SRCS=$(wildcard src/*.cpp)
+HDRS=$(wildcard src/*.h)
 CSRC=base64/base64.c
 OBJS=$(subst .cpp,.o,$(SRCS)) $(subst .c,.o,$(CSRC))
 
 all: bin/main bin/graphio
 
-%.o: %.c
+%.o:: %.c
 	gcc -g -c -o $@ $<
 
-%.o: %.cpp
+%.o:: $(HDRS)
+
+%.o:: %.cpp
 	g++ -I./base64 -std=c++1z -g -c -o $@ $<
 
-bin/main: bin src/*.cpp $(OBJS)
+bin/main: bin src/*.cpp $(OBJS) $(HDRS)
 	g++ -I./base64 -std=c++1z -o $@ -g -lstdc++ $(OBJS)
 
-bin/graphio: test/graphio.cpp
+bin/graphio: test/graphio.cpp $(HDRS)
 	g++ -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $<
 
 bin:

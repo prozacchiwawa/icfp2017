@@ -1,5 +1,6 @@
 #pragma once
 
+#include <typeinfo>
 #include <iostream>
 #include "boost/graph/adjacency_list.hpp"
 #include "boost/graph/topological_sort.hpp"
@@ -51,10 +52,10 @@ std::ostream &operator << (std::ostream &oustr, const DumbMap &m) {
     for (boost::tie(v, v_end) = boost::vertices(m.g); v != v_end; ++v) {
         boost::graph_traits<Graph>::out_edge_iterator e, e_end;
         for (boost::tie(e, e_end) = boost::out_edges(*v, m.g); e != e_end; ++e) {
-            
+            oustr << boost::source(*e, m.g) << " " << boost::target(*e, m.g) << "\n";
         }
     }
-    oustr << "\nend\n";
+    oustr << "end\n";
     return oustr;
 }
 }
