@@ -16,6 +16,6 @@ typedef boost::property_map < Graph, boost::vertex_name_t >::type NameMap;
 typedef boost::iterator_property_map < Vertex*, IndexMap, Vertex, Vertex& > PredecessorMap;
 typedef boost::iterator_property_map < Weight*, IndexMap, Weight, Weight& > DistanceMap;
  
-uint64_t score_player_map(const Graph& g, std::set<Vertex> mines);
+uint64_t score_player_map(const Graph& g, const std::set<Vertex> &mines);
 
 #endif //SCORE_EVAL_H

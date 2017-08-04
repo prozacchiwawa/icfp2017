@@ -50,7 +50,7 @@ def longmap_fun(map):
     return map
 
 
-# ideas: loop, tree
+# ideas: loop, tree, n-loop(topology)
 
 m = {
     "one" : { "map": onemap, "fun": onemap_fun },

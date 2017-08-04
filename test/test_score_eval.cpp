@@ -16,7 +16,7 @@
  
 int main(int, char *[])
 {
-#if 0 
+#if 1
   // Create a graph
   Graph g;
  
@@ -27,10 +27,10 @@ int main(int, char *[])
   Vertex v3 = boost::add_vertex(std::string("v3"), g);
  
   // Add weighted edges
-  Weight weight0 = 5;
-  Weight weight1 = 3;
-  Weight weight2 = 2;
-  Weight weight3 = 4;
+  Weight weight0 = 1;
+  Weight weight1 = 1;
+  Weight weight2 = 1;
+  Weight weight3 = 1;
  
   boost::add_edge(v0, v1, weight0, g);
   boost::add_edge(v1, v3, weight1, g);
@@ -50,7 +50,10 @@ int main(int, char *[])
       3
   */
 
-  uint64_t score = score_player_map(g, std::set(v0));
+  std::set<Vertex> mines;
+  mines.insert(v0);
+
+  uint64_t score = score_player_map(g, mines);
   std::cout << "Score: " << score << std::endl;
 #endif   
   return EXIT_SUCCESS;

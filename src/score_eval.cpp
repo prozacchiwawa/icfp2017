@@ -14,16 +14,7 @@
  
 #include "score_eval.h"
 
-
-/*
-template <class EdgeIter, class Graph>
-b(EdgeIter mine_edge, const Graph& G) {
-  
-}
-*/
-
-uint64_t
-score_player_map(const Graph& g, std::set<Vertex> mines) {
+uint64_t score_player_map(const Graph& g, const std::set<Vertex> &mines) {
 
   /*
   std::set<Vertex>::iterator it;
@@ -46,12 +37,15 @@ score_player_map(const Graph& g, std::set<Vertex> mines) {
   std::cout << "distances and parents:" << std::endl;
   auto nameMap = boost::get(boost::vertex_name, g);
  
+  uint64_t score = 0;
+
   BGL_FORALL_VERTICES(v, g, Graph)
   {
     std::cout << "distance(" << nameMap[v0] << ", " << nameMap[v] << ") = " << distanceMap[v] << ", ";
+    score += distanceMap[v] * distanceMap[v];
     std::cout << "predecessor(" << nameMap[v] << ") = " << nameMap[predecessorMap[v]] << std::endl;
   }
  
-
+  return score;
 }
  
