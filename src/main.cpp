@@ -158,7 +158,7 @@ std::ostream &operator << (std::ostream &oustr, const Move &m) {
     if (m.moveType == Claim) {
         return oustr << "claim " << " " << m.punter << " " << m.claim.source << m.claim.target << "\n";
     } else {
-        return oustr << "pass " << m.punter << "\n";
+        return oustr << "pass " << m.punter;
     }
 }
 
@@ -187,7 +187,7 @@ std::istream &operator >> (std::istream &instr, OurState &s) {
     instr >> r;
     size_t bsize = b64d_size(r.size());
     std::vector<char> vec(bsize);
-    b64_decode(reinterpret_cast<const unsigned char*>(r.c_str()), r.size(), reinterpret_cast<unsigned int *>(&vec[0]));
+    b64_decode(r.c_str(), r.size(), &vec[0]);
     std::istringstream iss(std::string(&vec[0], bsize));
     return iss >> s.setup;
 }
@@ -198,7 +198,7 @@ std::ostream &operator << (std::ostream &oustr, const OurState &s) {
     auto ostr = oss.str();
     size_t bsize = b64e_size(ostr.size());
     std::vector<char> vec(bsize);
-    b64_encode(reinterpret_cast<const unsigned int *>(ostr.c_str()), ostr.size(), reinterpret_cast<unsigned char *>(&vec[0]));
+    b64_encode(ostr.c_str(), ostr.size(), &vec[0]);
     return oustr << std::string(&vec[0], vec.size());
 }
 
@@ -212,7 +212,7 @@ int main() {
         std::cin >> s.setup >> s.moves;
     }
     the_move = Move::pass(s.setup.punter);
-    std::cout << the_move;
-    std::cout << s;
+    std::cout << the_move << "\n"; 
+    std::cout << s << "\n";
     return 0;
 }
