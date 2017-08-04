@@ -3,6 +3,7 @@
 #include <memory>
 #include <iostream>
 #include <exception>
+#include <sstream>
 
 #include "ourgraph.h"
 #include "game.h"
