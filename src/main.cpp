@@ -3,20 +3,12 @@
 #include <memory>
 #include <iostream>
 #include <exception>
-#include "boost/graph/adjacency_list.hpp"
-#include "boost/graph/topological_sort.hpp"
+
+#include "ourgraph.h"
 
 extern "C" {
 #include "base64.h"
 }
-
-using PID = int;
-using SID = std::string;
-using vecS = boost::vecS;
-using bidirectionalS = boost::bidirectionalS;
-using Weight = int;
-using Graph = boost::adjacency_list<vecS, vecS, bidirectionalS, SID, Weight>;
-using Vertex = boost::graph_traits < Graph >::vertex_descriptor;
 
 enum OpeningType {
     SetupOp, MoveOp
@@ -34,39 +26,6 @@ std::istream &operator >> (std::istream &instr, OpeningType &o) {
     } else {
         throw new std::exception();
     }
-}
-
-struct DumbMap {
-    Graph g;
-};
-
-std::istream &operator >> (std::istream &instr, DumbMap &m) {
-    std::string r, s;
-    size_t v = 0, e = 0;
-    std::map<SID, Vertex> vertices_by_name;
-    while (true) {
-        instr >> r;
-        if (r != "end") {
-            auto v = boost::add_vertex(r, m.g);
-            vertices_by_name[r] = v;
-        } else {
-            break;
-        }
-    }
-    while (true) {
-        instr >> r;
-        if (r != "end") {
-            instr >> s;
-            boost::add_edge(vertices_by_name[r], vertices_by_name[s], 1, m.g);
-        } else {
-            break;
-        };
-    }
-    return instr;
-}
-
-std::ostream &operator << (std::ostream &oustr, const DumbMap &m) {
-    return oustr;
 }
 
 struct OpeningSetup {
@@ -209,7 +168,7 @@ int main() {
     if (o.ot == SetupOp) {
         s.setup = o.setup;
     } else {
-        std::cin >> s.setup >> s.moves;
+        std::cin >> s.setup;
     }
     the_move = Move::pass(s.setup.punter);
     std::cout << the_move << "\n"; 
