@@ -168,7 +168,7 @@ int main() {
     if (o.ot == SetupOp) {
         s.setup = o.setup;
     } else {
-        std::cin >> s.setup;
+        std::cin >> s;
     }
     the_move = Move::pass(s.setup.punter);
     std::cout << the_move << "\n"; 
