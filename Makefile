@@ -7,7 +7,7 @@ OBJS=$(filter-out $(MAINS),$(ALL_OBJS)) # remove objs with a "main"
 CC=clang-3.9
 CXX=clang++-3.9
 B64=base64/base64.o
-FLAGS=-ferror-limit=1
+FLAGS=# -ferror-limit=1
 
 all: bin/main bin/graphio bin/test_score_eval bin/testgame bin/moveio
 

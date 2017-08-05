@@ -15,12 +15,6 @@ enum OpeningType {
     SetupOp, MoveOp
 };
 
-struct OpeningSetup {
-    PID punter;
-    size_t punters;
-    DumbMap map;
-};
-
 enum MoveType {
     Claim, Pass
 };
@@ -59,17 +53,23 @@ struct Move {
     }
 };
 
+using Moves = std::vector<Move>;
+
+struct OpeningSetup {
+    PID punter;
+    size_t punters;
+    DumbMap map;
+    Moves moves;
+};
+
 struct Opening {
     OpeningType ot;
     OpeningSetup setup;
     Move move;
 };
 
-using Moves = std::vector<Move>;
-
 struct OurState {
     OpeningSetup setup;
-    Moves moves;
     std::set<std::pair<SiteID,SiteID> > edges;    
 
     Move run();
@@ -88,17 +88,6 @@ std::istream &operator >> (std::istream &instr, OpeningType &o) {
     } else {
         throw new std::exception();
     }
-}
-
-std::istream &operator >> (std::istream &instr, OpeningSetup &os) {
-    instr >> os.punter;
-    instr >> os.punters;
-    instr >> os.map;
-    return instr;
-}
-
-std::ostream &operator << (std::ostream &oustr, const OpeningSetup &os) {
-    return oustr << os.punter << " " << os.punters << " " << os.map;
 }
 
 std::istream &operator >> (std::istream &instr, MoveType &m) {
@@ -142,16 +131,6 @@ std::ostream &operator << (std::ostream &oustr, const Move &m) {
     }
 }
 
-std::istream &operator >> (std::istream &instr, Opening &o) {
-    instr >> o.ot;
-    if (o.ot == SetupOp) {
-        instr >> o.setup;
-    } else {
-        instr >> o.move;
-    }
-    return instr;
-}
-
 std::istream &operator >> (std::istream &instr, Moves &m) {
     while (true) {
         try {
@@ -165,11 +144,33 @@ std::istream &operator >> (std::istream &instr, Moves &m) {
     return instr;
 }
 
-std::ostream &operator << (std::ostream &oustr, Moves &m) {
+std::ostream &operator << (std::ostream &oustr, const Moves &m) {
     for (auto it : m) {
         oustr << it << "\n";
     }
     return oustr;
+}
+
+std::istream &operator >> (std::istream &instr, OpeningSetup &os) {
+    instr >> os.punter;
+    instr >> os.punters;
+    instr >> os.map;
+    instr >> os.moves;
+    return instr;
+}
+
+std::ostream &operator << (std::ostream &oustr, const OpeningSetup &os) {
+    return oustr << os.punter << " " << os.punters << " " << os.map << " " << os.moves;
+}
+
+std::istream &operator >> (std::istream &instr, Opening &o) {
+    instr >> o.ot;
+    if (o.ot == SetupOp) {
+        instr >> o.setup;
+    } else {
+        instr >> o.move;
+    }
+    return instr;
 }
 
 std::istream &operator >> (std::istream &instr, OurState &s) {
