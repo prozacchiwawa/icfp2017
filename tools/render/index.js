@@ -49,7 +49,7 @@ window.onload = function() {
 
     for (var i = 0; i < data.sites.length; i++) {
         var site = data.sites[i];
-        g.addNode(site.id, { label: mines[site.id] ? "(λ) " + site.id : site.id, render: mines[site.id] ? renderLambda : renderNormal });
+        g.addNode(site.id, { label: mines[site.id] ? "(λ) " + site.id : "s:" + site.id, render: mines[site.id] ? renderLambda : renderNormal });
     }
 
     for (var i = 0; i < data.rivers.length; i++) {

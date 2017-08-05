@@ -6,6 +6,11 @@ Move Opening::run() {
     auto neighborhood = NeighborhoodSizeClassifier();
     auto connected = ConnectedToLambda();
     auto classifier = PlusClassifier<NeighborhoodSizeClassifier,ConnectedToLambda>(neighborhood, connected);
+
+    for (auto &it : edges) {
+        std::cerr << "BIG " << setup.punter << ": " << it.first << "," << it.second << "\n";
+    }
+    
     std::vector<Edge> scores;
     std::transform(edges.begin(), edges.end(), std::back_inserter(scores), [&] (const std::pair<SiteID,SiteID> &p) {
         auto e = Edge(p.first, p.second);
