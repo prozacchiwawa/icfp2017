@@ -171,6 +171,7 @@ std::istream &operator >> (std::istream &instr, DumbMap &m) {
     while(true) {
         instr >> r;
         if (r != "end") {
+            std::cout << "read mine " << r << "\n";
             m.mines.insert(r);
         } else {
             break;
@@ -195,6 +196,10 @@ std::ostream &operator << (std::ostream &oustr, const DumbMap &m) {
             auto p = make_ordered_pair(a,b);
             oustr << p.first << " " << p.second << "\n";
         });
+    }
+    oustr << "end\n";
+    for (auto &it : m.mines) {
+        oustr << it << " ";
     }
     oustr << "end\n";
     return oustr;
