@@ -215,14 +215,14 @@ Move randomTurn(const Opening &s) {
         }
     }
     
-  // obtain a time-based seed:
-  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-
-  shuffle (can_use.begin(), can_use.end(), std::default_random_engine(seed));
-  if (can_use.begin() != can_use.end()) {
-      return Move::claim(s.setup.punter, can_use[0].first, can_use[0].second);
-  } else {
-      return Move::pass(s.setup.punter);
-  }
+    // obtain a time-based seed:
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    
+    shuffle (can_use.begin(), can_use.end(), std::default_random_engine(seed));
+    if (can_use.begin() != can_use.end()) {
+        return Move::claim(s.setup.punter, can_use[0].first, can_use[0].second);
+    } else {
+        return Move::pass(s.setup.punter);
+    }
 }
 }

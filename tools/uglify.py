@@ -16,5 +16,6 @@ if __name__ == '__main__':
     print "end"
     for x in f['mines']:
         print x
-    print "end"
+    print "end" # End mines
+    print "end" # End initial moves
 

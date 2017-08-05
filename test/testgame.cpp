@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
             if (o.ot == SetupOp) {
                 auto edges = o.setup.map.getEdges();
                 numEdges = edges.size();
+                begin_game >> o.setup.moves;
             } else {
                 OurState os(o);
                 begin_game >> os;
