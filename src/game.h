@@ -131,6 +131,7 @@ std::ostream &operator << (std::ostream &oustr, const Move &m) {
 }
 
 std::istream &operator >> (std::istream &instr, Moves &m) {
+    m.clear();
     while (true) {
         try {
             Move mv;
