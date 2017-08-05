@@ -31,6 +31,14 @@ function renderNormal(r,n) { return render(r, n, "#96F07F"); }
 var mines = {};
 
 window.onload = function() {
+    var prev = document.getElementById('prev');
+    var next = document.getElementById('next');
+    prev.addEventListener('click', function() {
+        document.location = '/' + (data.page-1) + '.html';
+    });
+    next.addEventListener('click', function() {
+        document.location = '/' + (data.page+1) + '.html';
+    });
     console.log('start dracula');
     var g = new Graph();
  

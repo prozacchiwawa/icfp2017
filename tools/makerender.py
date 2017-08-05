@@ -14,6 +14,8 @@ alldata = []
 class IndexRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def doindex(self,pagenum):
         md5 = hashlib.md5()
+        alldata[pagenum]['page'] = pagenum
+        alldata[pagenum]['pages'] = len(alldata)
         index_data = open('render/index.html').read() % json.dumps(alldata[pagenum])
         md5.update(index_data)
         self.send_response(200)
