@@ -33,7 +33,7 @@ hello_msg = json.dumps(json.loads('{ "me" : "Eyes punter" }'));
 hello_len = len(hello_msg)
 
 sys.stdout.write("{}:{}".format(hello_len, hello_msg))
-
+sys.stdout.flush()
 
 def read_msg(infile):
     with StreamInput(infile) as f:
@@ -54,6 +54,7 @@ ready_msg = json.dumps({"ready" : my_id});
 ready_len = len(ready_msg)
 
 sys.stdout.write("{}:{}".format(ready_len, ready_msg))
+sys.stdout.flush()
 
 #print(initial_state, file=sys.stderr)
 
