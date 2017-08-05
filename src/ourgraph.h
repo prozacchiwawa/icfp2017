@@ -65,6 +65,17 @@ struct DumbMap {
             return res;
         }
         auto vtx = vtx_it->second;
+        for (auto ep = boost::in_edges(vtx, world);
+             ep.first != ep.second;
+             ++ep.first) {
+            if (limit >= 0 && res.size() >= limit) {
+                return res;
+            }
+            with_edge(ep, [&] (const std::string &a, const std::string &b) {
+                    res.push_back(make_ordered_pair(a,b));
+            });
+        }
+        
         for (auto ep = boost::out_edges(vtx, world);
              ep.first != ep.second;
              ++ep.first) {
@@ -170,14 +181,19 @@ std::istream &operator >> (std::istream &instr, DumbMap &m) {
 std::ostream &operator << (std::ostream &oustr, const DumbMap &m) {
     boost::graph_traits<Graph>::vertex_iterator v, v_end;
     for (boost::tie(v, v_end) = boost::vertices(m.world); v != v_end; ++v) {
-        oustr << *v << " ";
+        auto vtx_it = m.vertices_by_number.find(*v);
+        if (vtx_it == m.vertices_by_number.end()) {
+            throw std::exception();
+        }
+        auto vtx = *vtx_it;
+        oustr << vtx.second << " ";
     }
     oustr << "\nend\n";
-    for (boost::tie(v, v_end) = boost::vertices(m.world); v != v_end; ++v) {
-        boost::graph_traits<Graph>::out_edge_iterator e, e_end;
-        for (boost::tie(e, e_end) = boost::out_edges(*v, m.world); e != e_end; ++e) {
-            oustr << boost::source(*e, m.world) << " " << boost::target(*e, m.world) << "\n";
-        }
+    for (auto ep = boost::edges(m.world); ep.first != ep.second; ++ep.first) {
+        m.with_edge(ep, [&] (const std::string &a, const std::string &b) {
+            auto p = make_ordered_pair(a,b);
+            oustr << p.first << " " << p.second << "\n";
+        });
     }
     oustr << "end\n";
     return oustr;
