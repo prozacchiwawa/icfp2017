@@ -44,4 +44,4 @@ bin:
 	mkdir -p bin
 
 clean:
-	rm -rf */*.o bin
+	rm -rf */*.o bin/*

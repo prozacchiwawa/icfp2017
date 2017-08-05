@@ -5,7 +5,7 @@ Move Opening::run() {
     auto edges = setup.map.getUnclaimedEdges();
     auto neighborhood = NeighborhoodSizeClassifier();
     auto connected = ConnectedToLambda();
-    auto classifier = PlusClassifier(neighborhood, connected);
+    auto classifier = PlusClassifier<NeighborhoodSizeClassifier,ConnectedToLambda>(neighborhood, connected);
     std::vector<Edge> scores;
     std::transform(edges.begin(), edges.end(), std::back_inserter(scores), [&] (const std::pair<SiteID,SiteID> &p) {
         auto e = Edge(p.first, p.second);

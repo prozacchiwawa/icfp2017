@@ -4,6 +4,8 @@ from __future__ import print_function
 import json
 import sys
 import itertools
+import subprocess as sub
+import base64
 
 class StreamInput(object):
     def __init__(self, file):
@@ -59,8 +61,21 @@ sys.stdout.flush()
 #print(initial_state, file=sys.stderr)
 
 
+# TODO: try/catch, loop, feed back base64 state
 
-#punter punters map
+# main is cppgame
+p = sub.Popen(["./bin/main"], stdout=sub.PIPE, stdin=sub.PIPE)
 
-# 21:{"me": "Eyes punter"}
-# 
+print (p)
+
+# setup <player_id> <num_players> [node_ids] end [edges] end [mines] end
+(stdoutdata, stderrdata) = p.communicate("setup 0 2 0 1 2 3 end 0 1 1 3 0 2 2 3 end 0 end")
+
+print( stdoutdata, stderrdata)
+
+(stdoutdata, stderrdata) = p.communicate("move pass 1 claim 0 0 2 end")
+
+print( stdoutdata, stderrdata)
+
+
+
