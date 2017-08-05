@@ -61,7 +61,7 @@ if __name__ == '__main__':
     map = read_json_file(config["mapfile"])
     num_players = config["num_players"]
 
-    print ("CONFIG: {}".format(config))
+    dbg ("CONFIG: {}".format(config))
 
     p = player_run()
 

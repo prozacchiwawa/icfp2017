@@ -37,15 +37,15 @@ if "map" in server_msg:
     p = play.player_run()
     (player_commands, player_data) = play.player_setup(p, my_id, punters, map)
     #dbg("PLAYER_SETUP_STATE: {}".format(player_data))
-    gamerunner.send_ready(sys.stdout, my_id, {}) #{"cpp":player_data})
+    gamerunner.send_ready(sys.stdout, my_id, {"cpp":player_data})
 else:
     dbg ("MOVE")
     moves = server_msg["move"]
-    state = server_msg["state"]
+    state = server_msg["state"]["cpp"]
     p = play.player_run()
     (player_commands, player_data) = play.player_turn(p, my_id, moves, state)
     msg = deuglify.decode(player_commands, player_data)
-    print(msg)
+    dbg(msg)
     gamerunner.send_msg(msg)
 
 sys.exit(0)
@@ -76,7 +76,7 @@ config = read_config()
 map = read_json_file(config["mapfile"])
 num_players = config["num_players"]
 
-print ("CONFIG: {}".format(config))
+debug ("CONFIG: {}".format(config))
 
 p = sub.Popen(["./bin/main"], stdout=sub.PIPE, stdin=sub.PIPE)
 
@@ -102,11 +102,11 @@ def player_turn(player_id, prev_player_commands, prev_player_data):
 
 def player_comm(player_id, msg):
     (stdoutdata, stderrdata) = p.communicate(msg)
-    print ("SERVER: {}".format(msg))
+    dbg ("SERVER: {}".format(msg))
     player_tokens = stdoutdata.split()
     player_commands = player_tokens[:-1]
     player_data = player_tokens[-1]
-    print ("PLAYER: COMMANDS: {} DATA: {}".format(player_commands, player_data))
+    dbg ("PLAYER: COMMANDS: {} DATA: {}".format(player_commands, player_data))
     return (player_commands, player_data)
     p.wait()
 
