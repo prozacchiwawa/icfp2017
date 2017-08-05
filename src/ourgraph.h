@@ -171,7 +171,6 @@ std::istream &operator >> (std::istream &instr, DumbMap &m) {
     while(true) {
         instr >> r;
         if (r != "end") {
-            std::cout << "read mine " << r << "\n";
             m.mines.insert(r);
         } else {
             break;
