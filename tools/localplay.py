@@ -41,29 +41,7 @@ print (p)
 #print( "OUT: {} ERR: {}".format(stdoutdata, stderrdata))
 
 
-# Map contains nodes, rivers & mine IDs
-# Number of players is implictly = # num of rivers
-def player_setup(player_id, map):
-    import uglify
-    msg = uglify.convert_map(player_id, len(map['rivers']), map)
-    return player_comm(player_id, msg)
-
-# Input state is turns from last time, plus player state from last time
-def player_turn(player_id, prev_player_commands, prev_player_data):
-    msg  = "move pass 1 {} {}".format(' '.join(prev_player_commands), prev_player_data)
-    return player_comm(player_id, msg)
-
-def player_comm(player_id, msg):
-    (stdoutdata, stderrdata) = p.communicate(msg)
-    print ("SERVER: {}".format(msg))
-    player_tokens = stdoutdata.split()
-    player_commands = player_tokens[:-1]
-    player_data = player_tokens[-1]
-    print ("PLAYER: COMMANDS: {} DATA: {}".format(player_commands, player_data))
-    return (player_commands, player_data)
-    p.wait()
-
-(player_commands, player_data) = player_setup(0, map)
+(player_commands, player_data) = player_setup(0,  len(map['rivers']), map)
 
 max_moves = 4
 moves = 1
