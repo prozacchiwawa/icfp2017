@@ -1,4 +1,4 @@
-var colors = ["#f7eda3","#f7e771","#b8e847","#b8f957","#2fe292", "#6782d3","#516ecc","#4b8ddd","#f2d5ae","#f9a9d7", "#0b9342","#fce5c4","#87d14f","#82f2c7","#eac885", "#fffdad","#abffa8","#907ae8","#e5764e","#53d1ca", "#7951ba","#90e80d","#7fe8ae","#e0320f","#7de8d9", "#fc6cdd","#8c0e12","#dd738c","#3e69c1","#6ae8ab"]
+var colors = ["red","goldenrod","steelblue","firebrick","#2fe292","#4b8ddd","#f2d5ae","#f9a9d7", "#0b9342","#fce5c4","#87d14f","#82f2c7","#eac885", "#fffdad","#abffa8","#907ae8","#e5764e","#53d1ca", "#7951ba","#90e80d","#7fe8ae","#e0320f","#7de8d9", "#fc6cdd","#8c0e12","#dd738c","#3e69c1","#6ae8ab"]
 
 function isclaimed(data, river) {
     var s = river.source;
@@ -56,8 +56,9 @@ window.onload = function() {
         var river = data.rivers[i];
         var claimed = isclaimed(data, river);
         if (claimed !== null) {
-            var color = colors[claimed % colors.length];
-            g.addEdge(river.source, river.target, { stroke: "#bfa", fill: color, label: claimed });
+            var clsplit = parseInt(claimed.split(':')[1]);
+            var color = colors[clsplit % colors.length];
+            g.addEdge(river.source, river.target, { stroke: color, fill: color, label: claimed });
         } else {
             g.addEdge(river.source, river.target);
         }
