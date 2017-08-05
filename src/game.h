@@ -155,6 +155,12 @@ std::istream &operator >> (std::istream &instr, OpeningSetup &os) {
     instr >> os.punters;
     instr >> os.map;
     instr >> os.moves;
+    os.map.setPunters(os.punters);
+    for (auto &it : os.moves) {
+        if (it.moveType == Claim) {
+            os.map.addMove(it.punter, it.claimMove.source, it.claimMove.target);
+        }
+    }
     return instr;
 }
 
