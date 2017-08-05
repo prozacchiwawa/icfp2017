@@ -53,7 +53,7 @@ struct Move {
     }
 };
 
-using Moves = std::vector<Move>;
+using Moves = std::set<Move>;
 
 struct OpeningSetup {
     PID punter;
@@ -65,13 +65,13 @@ struct OpeningSetup {
 struct Opening {
     OpeningType ot;
     OpeningSetup setup;
+
+    Move run();
 };
 
 struct OurState {
-    OpeningSetup setup;
-    std::set<std::pair<SiteID,SiteID> > edges;    
-
-    Move run();
+    OurState(Opening &o) : setup(o.setup) { }
+    OpeningSetup &setup;
 };
 
 namespace {
@@ -131,12 +131,11 @@ std::ostream &operator << (std::ostream &oustr, const Move &m) {
 }
 
 std::istream &operator >> (std::istream &instr, Moves &m) {
-    m.clear();
     while (true) {
         try {
             Move mv;
             instr >> mv;
-            m.push_back(mv);
+            m.insert(mv);
         } catch (...) {
             break;
         }
@@ -148,6 +147,7 @@ std::ostream &operator << (std::ostream &oustr, const Moves &m) {
     for (auto it : m) {
         oustr << it << "\n";
     }
+    oustr << " end\n";
     return oustr;
 }
 
@@ -156,6 +156,7 @@ std::istream &operator >> (std::istream &instr, OpeningSetup &os) {
     instr >> os.punters;
     instr >> os.map;
     instr >> os.moves;
+    
     os.map.setPunters(os.punters);
     for (auto &it : os.moves) {
         if (it.moveType == Claim) {
@@ -199,12 +200,19 @@ std::ostream &operator << (std::ostream &oustr, const OurState &s) {
     return oustr << std::string(&vec[0], vec.size()-1);
 }
 
-Move randomTurn(const OurState &s) {
+Move randomTurn(const Opening &s) {
     std::vector<std::pair<SiteID,SiteID> > can_use;
     std::vector<std::pair<SiteID,SiteID> > edges = s.setup.map.getEdges();
 
+    for (auto &it : s.setup.map.played_edges) {
+        std::cout << "played edge " << it.first << "," << it.second << "\n";
+    }
+    
     for (auto &it : edges) {
-        if (s.setup.map.played_edges.find(it) == s.setup.map.played_edges.end()) {
+        auto pe = s.setup.map.played_edges.find(it);
+        auto res = pe == s.setup.map.played_edges.end();
+        std::cout << "check edge " << it.first << "," << it.second << " res " << res << "\n";
+        if (res) {
             can_use.push_back(it);
         }
     }
@@ -221,6 +229,6 @@ Move randomTurn(const OurState &s) {
 }
 }
 
-Move OurState::run() {
+Move Opening::run() {
     return randomTurn(*this);
 }
