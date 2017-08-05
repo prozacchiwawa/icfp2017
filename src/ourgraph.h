@@ -24,6 +24,12 @@ using Weight = boost::property<boost::edge_weight_t, int>;
 using Graph = boost::adjacency_list<vecS, vecS, bidirectionalS, VertexStoreType, Weight>;
 using Vertex = boost::graph_traits < Graph >::vertex_descriptor;
 
+template <class A>
+std::pair<A,A> make_ordered_pair(const A &a, const A &b) {
+    if (a < b) { return std::make_pair(a, b); }
+    else { return std::make_pair(b, a); }
+}
+
 struct DumbMap {
     Graph world;
 
@@ -32,34 +38,71 @@ struct DumbMap {
     
     std::vector<std::set<SiteID> > player_mines;
     std::set<std::pair<SiteID, SiteID> > played_edges;
+    std::vector<std::set<SiteID> > player_vertices;
 
     std::map<SiteID, Vertex> vertices_by_name;
     std::map<int, SiteID> vertices_by_number;
 
+    template <class E>
+    void with_edge(const E &ep, std::function<void(const std::string &a, const std::string &b)> f) const {
+        auto vs1 = boost::source(*ep.first, world);
+        auto vs2 = boost::target(*ep.first, world);
+        auto vs1_by_idx_it = vertices_by_number.find(vs1);
+        auto vs2_by_idx_it = vertices_by_number.find(vs2);
+        if (vs1_by_idx_it == vertices_by_number.end() ||
+            vs2_by_idx_it == vertices_by_number.end()) {
+            throw std::exception();
+        }
+        auto vs1_by_idx = *vs1_by_idx_it;
+        auto vs2_by_idx = *vs2_by_idx_it;
+        f(vs1_by_idx.second, vs2_by_idx.second);
+    }
+    
+    std::vector<std::pair<SiteID, SiteID> > getEdgesAway(const std::string &from, int limit = -1) const {
+        std::vector<std::pair<SiteID, SiteID> > res;
+        auto vtx_it = vertices_by_name.find(from);
+        if (vtx_it == vertices_by_name.end()) {
+            return res;
+        }
+        auto vtx = vtx_it->second;
+        for (auto ep = boost::out_edges(vtx, world);
+             ep.first != ep.second;
+             ++ep.first) {
+            if (limit >= 0 && res.size() >= limit) {
+                return res;
+            }
+            with_edge(ep, [&] (const std::string &a, const std::string &b) {
+                    res.push_back(make_ordered_pair(a,b));
+            });
+        }
+    }
+    
     std::vector<std::pair<SiteID, SiteID> > getEdges() const {
         std::vector<std::pair<SiteID, SiteID> > edges;
         for (auto ep = boost::edges(world); ep.first != ep.second; ++ep.first) {
-            auto vs1 = boost::source(*ep.first, world);
-            auto vs2 = boost::target(*ep.first, world);
-            auto vs1_by_idx_it = vertices_by_number.find(vs1);
-            auto vs2_by_idx_it = vertices_by_number.find(vs2);
-            if (vs1_by_idx_it == vertices_by_number.end() ||
-                vs2_by_idx_it == vertices_by_number.end()) {
-                throw std::exception();
-            }
-            auto vs1_by_idx = *vs1_by_idx_it;
-            auto vs2_by_idx = *vs2_by_idx_it;
-            if (vs1_by_idx.second < vs2_by_idx.second) {
-                edges.push_back(std::make_pair(vs1_by_idx.second, vs2_by_idx.second));
-            } else {
-                edges.push_back(std::make_pair(vs2_by_idx.second, vs1_by_idx.second));
-            }                
+            with_edge(ep, [&] (const std::string &a, const std::string &b) {
+                    edges.push_back(make_ordered_pair(a,b));
+            });
+        }
+        return edges;
+    }
+
+    std::vector<std::pair<SiteID, SiteID> > getUnclaimedEdges() const {
+        std::vector<std::pair<SiteID, SiteID> > edges;
+        for (auto ep = boost::edges(world); ep.first != ep.second; ++ep.first) {
+            with_edge(ep, [&] (const std::string &a, const std::string &b) {
+                    auto p = make_ordered_pair(a,b);
+                    if (played_edges.find(p) == played_edges.end()) {
+                        edges.push_back(p);
+                    }
+            });
         }
         return edges;
     }
 
     void setPunters(int all) {
         player_mines.resize(all);
+        player_vertices.resize(all);
         played.resize(all);
     }
 
@@ -72,13 +115,20 @@ struct DumbMap {
         auto a_v = *a_it;
         auto b_v = *b_it;
         auto &playerg = played[punter];
-        if (a < b) {
-            played_edges.insert(std::make_pair(a, b));
-            boost::add_edge(a_v.second, b_v.second, 1, played[punter]);
-        } else {
-            played_edges.insert(std::make_pair(b, a));
-            boost::add_edge(b_v.second, a_v.second, 1, played[punter]);
+        if (mines.find(a) != mines.end()) {
+            player_mines[punter].insert(a);
         }
+        if (mines.find(b) != mines.end()) {
+            player_mines[punter].insert(b);
+        }
+        player_vertices[punter].insert(a);
+        player_vertices[punter].insert(b);
+        auto op =
+            make_ordered_pair(std::make_pair(a, a_v), std::make_pair(b, b_v));
+        auto ap = &op.first;
+        auto bp = &op.second;
+        played_edges.insert(std::make_pair(ap->first, bp->first));
+        boost::add_edge(ap->second.second, bp->second.second, 1, played[punter]);
     }
 };
 

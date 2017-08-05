@@ -1,9 +1,17 @@
 #include <iostream>
+#include <fstream>
 #include "ourgraph.h"
 #include "game.h"
 
-int main() {
-    std::string continue_game("setup 0 2 0 1 2 3 end 0 1 1 3 0 2 2 3 end 0 end");
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        std::cerr << "usage: testgame map.crk\n";
+        return 1;
+    }
+    std::ifstream gamefile(argv[1]);
+    std::string continue_game
+        ((std::istreambuf_iterator<char>(gamefile)),
+         std::istreambuf_iterator<char>());
     std::string game_state;
     int numEdges = -1;
     for (int i = 0; i != numEdges; i++) {
