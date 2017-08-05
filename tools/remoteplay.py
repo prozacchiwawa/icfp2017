@@ -33,6 +33,7 @@ if "map" in server_msg:
     init_state = server_msg
     dbg ("INIT STATE {}".format(init_state))
     my_id = init_state["punter"]
+    dbg ("     ----- We are punter # {} -----".format(my_id))
     punters = init_state["punters"]
     map = init_state["map"]
     p = play.player_run()
@@ -53,7 +54,7 @@ elif "stop" in server_msg:
     moves = server_msg["stop"]
     scores = moves["scores"]
     dbg("SCORES: {}".format(scores))
-    state = server_msg["state"]["cpp"]
+    #state = server_msg["state"]["cpp"]
     p = play.player_run()
     (player_commands, player_data) = play.player_turn(p, my_id, moves, state)
     msg = deuglify.decode(player_commands, player_data)
