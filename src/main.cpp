@@ -15,7 +15,9 @@ extern "C" {
 int main() {
     Opening o;
     std::cin >> o;
-    if (o.ot != SetupOp) {
+    if (o.ot == SetupOp) {
+        std::cin >> o.setup.moves;
+    } else {
         OurState os(o);
         std::cin >> os;
     }

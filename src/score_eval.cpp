@@ -100,9 +100,6 @@ uint64_t score_player_map(PID punter, const DumbMap& d) {
       
         auto v0_name = v0.first;
       
-        // Output results
-        std::cout << "distances and parents for mine " << v0_name << std::endl;
-      
         for (auto &it : player_vertices) {
             auto v1_it = d.vertices_by_name.find(it);
             if (v1_it == d.vertices_by_name.end()) {
