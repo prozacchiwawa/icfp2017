@@ -182,9 +182,9 @@ std::istream &operator >> (std::istream &instr, OurState &s) {
     std::string r;
     instr >> r;
     size_t bsize = b64d_size(r.size());
-    std::vector<char> vec(bsize);
+    std::vector<char> vec(bsize+1);
     b64_decode(r.c_str(), r.size(), &vec[0]);
-    std::istringstream iss(std::string(&vec[0], bsize));
+    std::istringstream iss(std::string(&vec[0], bsize-1));
     return iss >> s.setup;
 }
 
@@ -193,9 +193,9 @@ std::ostream &operator << (std::ostream &oustr, const OurState &s) {
     oss << s.setup;
     auto ostr = oss.str();
     size_t bsize = b64e_size(ostr.size());
-    std::vector<char> vec(bsize);
+    std::vector<char> vec(bsize+1);
     b64_encode(ostr.c_str(), ostr.size(), &vec[0]);
-    return oustr << std::string(&vec[0], vec.size());
+    return oustr << std::string(&vec[0], vec.size()-1);
 }
 
 Move randomTurn(const OurState &s) {
