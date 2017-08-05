@@ -1,3 +1,3 @@
 
-./lamduct --log-level 3 --game-hostname punter.inf.ed.ac.uk --game-port 9073 ./tools/gamerunner.py
+./lamduct --client-instance-logfile game.log --log-level 3 --game-hostname punter.inf.ed.ac.uk --game-port 9005 ./tools/remoteplay.py
 

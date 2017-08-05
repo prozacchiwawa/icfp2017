@@ -31,11 +31,20 @@ class StreamInput(object):
 
 #print("Hi", file=sys.stderr)
 
-hello_msg = json.dumps(json.loads('{ "me" : "Eyes punter" }'));
-hello_len = len(hello_msg)
+def dbg(msg):
+    print(msg, file=sys.stderr)
 
-sys.stdout.write("{}:{}".format(hello_len, hello_msg))
-sys.stdout.flush()
+
+def send_to_server(f, msg):
+    msg_len = len(msg)
+    fmsg = "{}:{}".format(msg_len, msg)
+    dbg("PLAYER_READY_MSG: {}".format(fmsg))
+    f.write(fmsg)
+    f.flush()
+
+def send_hello(f):
+    hello_msg = json.dumps(json.loads('{ "me" : "Eyes punter" }'));
+    send_to_server(f, hello_msg)
 
 def read_msg(infile):
     with StreamInput(infile) as f:
@@ -46,17 +55,20 @@ def read_msg(infile):
         json_str = sys.stdin.read(json_len)
         return json.loads(json_str)
 
+def send_ready(f, my_id, state):
+    ready_msg = json.dumps({"ready" : my_id, "state":state});
+    send_to_server(f, ready_msg)
 
-hello_reply = read_msg(sys.stdin)
-initial_state = read_msg(sys.stdin)
 
-my_id = initial_state["punter"]
+if __name__ == "__main__":
 
-ready_msg = json.dumps({"ready" : my_id});
-ready_len = len(ready_msg)
+    send_hello()
+    hello_reply = read_msg(sys.stdin)
+    initial_state = read_msg(sys.stdin)
 
-sys.stdout.write("{}:{}".format(ready_len, ready_msg))
-sys.stdout.flush()
+    my_id = initial_state["punter"]
+    
+    send_ready(sys.stdout, my_id)
 
 #print(initial_state, file=sys.stderr)
 
@@ -64,18 +76,18 @@ sys.stdout.flush()
 # TODO: try/catch, loop, feed back base64 state
 
 # main is cppgame
-p = sub.Popen(["./bin/main"], stdout=sub.PIPE, stdin=sub.PIPE)
+    p = sub.Popen(["./bin/main"], stdout=sub.PIPE, stdin=sub.PIPE)
 
-print (p)
+    print (p)
 
 # setup <player_id> <num_players> [node_ids] end [edges] end [mines] end
-(stdoutdata, stderrdata) = p.communicate("setup 0 2 0 1 2 3 end 0 1 1 3 0 2 2 3 end 0 end")
+    (stdoutdata, stderrdata) = p.communicate("setup 0 2 0 1 2 3 end 0 1 1 3 0 2 2 3 end 0 end")
 
-print( stdoutdata, stderrdata)
+    print( stdoutdata, stderrdata)
 
-(stdoutdata, stderrdata) = p.communicate("move pass 1 claim 0 0 2 end")
+    (stdoutdata, stderrdata) = p.communicate("move pass 1 claim 0 0 2 end")
 
-print( stdoutdata, stderrdata)
+    print( stdoutdata, stderrdata)
 
 
 
