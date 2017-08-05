@@ -21,8 +21,8 @@ function render(r, n, fillColor) {
     /* the Raphael set is obligatory, containing all you want to display */
     var set = r.set().push(
         /* custom objects go here */
-        r.rect(n.point[0]-30, n.point[1]-13, 62, 66).attr({"fill": fillColor, "stroke-width": 2, r : "9px"})).push(
-            r.text(n.point[0], n.point[1] + 20, n.label).attr({"font-size":"14px"}));
+        r.rect(n.point[0]-20, n.point[1]-12, 40, 40).attr({"fill": fillColor, "stroke-width": 2, r : "8px"})).push(
+            r.text(n.point[0], n.point[1] + 10, n.label).attr({"font-size":"12px"}));
     return set;
 };
 function renderLambda(r,n) { return render(r, n, "#DE5B5B"); }
