@@ -1,3 +1,5 @@
+#pragma once
+
 #include <set>
 #include <random>
 #include <chrono>
@@ -6,6 +8,7 @@
 #include <algorithm>
 
 #include "ourgraph.h"
+#include "plan.h"
 
 extern "C" {
     #include "base64.h"
@@ -222,8 +225,4 @@ Move randomTurn(const Opening &s) {
       return Move::pass(s.setup.punter);
   }
 }
-}
-
-Move Opening::run() {
-    return randomTurn(*this);
 }

@@ -31,8 +31,8 @@ bin/moveio: test/moveio.cpp $(HDRS)
 bin/test_score_eval: test/test_score_eval.cpp src/score_eval.o $(HDRS)
 	$(CXX) $(FLAGS) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(OBJS)
 
-bin/testgame: test/testgame.cpp $(HDRS)
-	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(B64)
+bin/testgame: test/testgame.cpp src/plan.o src/game.o $(HDRS)
+	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/testgame.cpp src/plan.o src/game.o $(B64)
 
 bin:
 	mkdir -p bin
