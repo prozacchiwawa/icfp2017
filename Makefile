@@ -9,7 +9,7 @@ CXX=clang++-3.9
 B64=base64/base64.o
 FLAGS=# -ferror-limit=1
 
-all: bin/main bin/graphio bin/test_score_eval bin/testgame bin/moveio bin/testmap
+all: bin/main bin/graphio bin/test_score_eval bin/testgame bin/moveio bin/testmap bin/fightgame
 
 %.o:: %.c
 	gcc -g -c -o $@ $<
@@ -36,6 +36,9 @@ bin/testgame: test/testgame.cpp src/plan.o src/game.o $(HDRS)
 
 bin/testmap: test/testmap.cpp src/plan.o src/game.o $(HDRS)
 	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/testmap.cpp src/plan.o src/game.o $(B64)
+
+bin/fightgame: test/fightgame.cpp src/plan.o src/game.o src/score_eval.o $(HDRS)
+	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/fightgame.cpp src/plan.o src/game.o src/score_eval.o $(B64)
 
 bin:
 	mkdir -p bin

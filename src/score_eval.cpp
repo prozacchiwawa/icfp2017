@@ -63,47 +63,61 @@ std::map<SiteID,std::set<SiteID> > player_mine_connected_paths(const DumbMap& pg
 
 
 uint64_t score_player_map(PID punter, const DumbMap& d) {
+    uint64_t score = 0;
 
-  uint64_t score = 0;
+    std::set<SiteID>::iterator it;
+    auto &mines = d.player_mines[punter];
+    auto &player_vertices = d.player_vertices[punter];
+    auto &pg = d.played[punter];
 
-  std::set<SiteID>::iterator it;
-  auto &mines = d.player_mines[punter];
-  auto &pg = d.played[punter];
-
-  for (it = mines.begin(); it != mines.end(); ++it) {
+    for (it = mines.begin(); it != mines.end(); ++it) {
   
-    auto &g = d.world;
-    auto &player_graph = pg;
-    auto v0_it = d.vertices_by_name.find(*it);
-    if (v0_it == d.vertices_by_name.end()) {
-      throw std::exception();
-    }
-    auto v0 = *v0_it;
-
-    // State for Dijkstra
-    // Compute shortest paths from each mine to all othervertices, 
-    // and store the output in predecessors and distances
-    boost::dijkstra_shortest_paths
-      (g,
-       v0.second,
-       boost::no_named_parameters()
-       );
- 
-    // Output results
-    std::cout << "distances and parents:" << std::endl;
- 
-    BGL_FORALL_VERTICES(v, g, Graph)
-      {
-        auto v1_it = d.vertices_by_number.find(v);
-        if (v1_it == d.vertices_by_number.end()) {
-          throw std::exception();
+        auto &g = d.world;
+        auto &player_graph = pg;
+        auto v0_it = d.vertices_by_name.find(*it);
+        if (v0_it == d.vertices_by_name.end()) {
+            throw std::exception();
         }
-        auto v1 = *v1_it;
-        std::cout
-          << "distance(" << v0.first << ", " << v1.first << ") = " << 1 << ", ";
-        score++;
-      }
-  }
-  return score;
+        auto v0 = *v0_it;
+      
+        std::vector<int> distances;
+        distances.assign
+            (d.vertices_by_name.size(), std::numeric_limits<int>::max());
+
+        // XXX Never change, we can cache these.
+        std::vector<int> world_distances;
+        world_distances.assign
+            (d.vertices_by_name.size(), std::numeric_limits<int>::max());
+        
+        // State for Dijkstra
+        // Compute shortest paths from each mine to all othervertices, 
+        // and store the output in predecessors and distances
+        boost::dijkstra_shortest_paths
+            (pg, v0.second, boost::distance_map(&distances[0]));
+
+        boost::dijkstra_shortest_paths
+            (pg, v0.second, boost::distance_map(&world_distances[0]));
+      
+        auto v0_name = v0.first;
+      
+        // Output results
+        std::cout << "distances and parents for mine " << v0_name << std::endl;
+      
+        for (auto &it : player_vertices) {
+            auto v1_it = d.vertices_by_name.find(it);
+            if (v1_it == d.vertices_by_name.end()) {
+                throw std::exception();
+            }
+          
+            auto &v1_name = v1_it->first;
+            auto v = v1_it->second;
+
+            if (v1_name != v0_name &&
+                distances[v] != std::numeric_limits<int>::max()) {
+                score += world_distances[v] * world_distances[v];
+            }
+        }
+    }
+    return score;
 }
  
