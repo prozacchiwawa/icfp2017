@@ -14,7 +14,7 @@
     {"source":1, "target":6},
     {"source":1, "target":7},
     {"source":1, "target":8},
-    {"source":1, "target":9},
+    {"source":1, "target":9}
 ],
 "mines": [0]
 }
