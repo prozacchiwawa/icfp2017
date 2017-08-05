@@ -86,6 +86,7 @@ struct DumbMap {
                     res.push_back(make_ordered_pair(a,b));
             });
         }
+        return res;
     }
     
     std::vector<std::pair<SiteID, SiteID> > getEdges() const {
