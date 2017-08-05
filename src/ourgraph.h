@@ -26,10 +26,12 @@ using Vertex = boost::graph_traits < Graph >::vertex_descriptor;
 
 struct DumbMap {
     Graph world;
+
     std::vector<Graph> played;
     std::set<SiteID> mines;
     
     std::vector<std::set<SiteID> > player_mines;
+    std::set<std::pair<SiteID, SiteID> > played_edges;
 
     std::map<SiteID, Vertex> vertices_by_name;
     std::map<int, SiteID> vertices_by_number;
@@ -71,8 +73,10 @@ struct DumbMap {
         auto b_v = *b_it;
         auto &playerg = played[punter];
         if (a < b) {
+            played_edges.insert(std::make_pair(a, b));
             boost::add_edge(a_v.second, b_v.second, 1, played[punter]);
         } else {
+            played_edges.insert(std::make_pair(b, a));
             boost::add_edge(b_v.second, a_v.second, 1, played[punter]);
         }
     }

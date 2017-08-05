@@ -208,7 +208,9 @@ Move randomTurn(const OurState &s) {
     }
 
     for (auto &it : edges) {
-        
+        if (s.setup.map.played_edges.find(it) == s.setup.map.played_edges.end()) {
+            can_use.push_back(it);
+        }
     }
     
   // obtain a time-based seed:
