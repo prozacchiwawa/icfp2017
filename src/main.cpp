@@ -14,15 +14,14 @@ extern "C" {
 
 int main() {
     Opening o;
-    OurState s;
     std::cin >> o;
-    if (o.ot == SetupOp) {
-        s.setup = o.setup;
-    } else {
-        std::cin >> s;
+    if (o.ot != SetupOp) {
+        OurState os(o);
+        std::cin >> os;
     }
-    auto take_move = s.run();
-    std::cout << take_move << "\n";
-    std::cout << s << "\n";
+    auto take_move = o.run();
+    o.setup.moves.insert(take_move);
+    std::cout << o.setup.moves << "\n";
+    std::cout << OurState(o) << "\n";
     return 0;
 }

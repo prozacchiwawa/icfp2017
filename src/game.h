@@ -53,7 +53,7 @@ struct Move {
     }
 };
 
-using Moves = std::vector<Move>;
+using Moves = std::set<Move>;
 
 struct OpeningSetup {
     PID punter;
@@ -65,13 +65,13 @@ struct OpeningSetup {
 struct Opening {
     OpeningType ot;
     OpeningSetup setup;
+
+    Move run();
 };
 
 struct OurState {
-    OpeningSetup setup;
-    std::set<std::pair<SiteID,SiteID> > edges;    
-
-    Move run();
+    OurState(Opening &o) : setup(o.setup) { }
+    OpeningSetup &setup;
 };
 
 namespace {
@@ -135,7 +135,7 @@ std::istream &operator >> (std::istream &instr, Moves &m) {
         try {
             Move mv;
             instr >> mv;
-            m.push_back(mv);
+            m.insert(mv);
         } catch (...) {
             break;
         }
@@ -147,6 +147,7 @@ std::ostream &operator << (std::ostream &oustr, const Moves &m) {
     for (auto it : m) {
         oustr << it << "\n";
     }
+    oustr << " end\n";
     return oustr;
 }
 
@@ -155,6 +156,7 @@ std::istream &operator >> (std::istream &instr, OpeningSetup &os) {
     instr >> os.punters;
     instr >> os.map;
     instr >> os.moves;
+    
     os.map.setPunters(os.punters);
     for (auto &it : os.moves) {
         if (it.moveType == Claim) {
@@ -182,9 +184,9 @@ std::istream &operator >> (std::istream &instr, OurState &s) {
     std::string r;
     instr >> r;
     size_t bsize = b64d_size(r.size());
-    std::vector<char> vec(bsize);
+    std::vector<char> vec(bsize+1);
     b64_decode(r.c_str(), r.size(), &vec[0]);
-    std::istringstream iss(std::string(&vec[0], bsize));
+    std::istringstream iss(std::string(&vec[0], bsize-1));
     return iss >> s.setup;
 }
 
@@ -193,22 +195,21 @@ std::ostream &operator << (std::ostream &oustr, const OurState &s) {
     oss << s.setup;
     auto ostr = oss.str();
     size_t bsize = b64e_size(ostr.size());
-    std::vector<char> vec(bsize);
+    std::vector<char> vec(bsize+1);
     b64_encode(ostr.c_str(), ostr.size(), &vec[0]);
-    return oustr << std::string(&vec[0], vec.size());
+    return oustr << std::string(&vec[0], vec.size()-1);
 }
 
-Move randomTurn(const OurState &s) {
+Move randomTurn(const Opening &s) {
     std::vector<std::pair<SiteID,SiteID> > can_use;
     std::vector<std::pair<SiteID,SiteID> > edges = s.setup.map.getEdges();
 
-    std::cout << "randomTurn from " << edges.size() << "\n";
-    for (auto it : edges) {
-        std::cout << "t " << it.first << "," << it.second << "\n";
-    }
-
     for (auto &it : edges) {
-        
+        auto pe = s.setup.map.played_edges.find(it);
+        auto res = pe == s.setup.map.played_edges.end();
+        if (res) {
+            can_use.push_back(it);
+        }
     }
     
   // obtain a time-based seed:
@@ -223,6 +224,6 @@ Move randomTurn(const OurState &s) {
 }
 }
 
-Move OurState::run() {
+Move Opening::run() {
     return randomTurn(*this);
 }
