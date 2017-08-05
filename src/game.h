@@ -5,6 +5,8 @@
 #include <iostream>
 #include <algorithm>
 
+#include "ourgraph.h"
+
 extern "C" {
     #include "base64.h"
 }
@@ -63,7 +65,7 @@ struct Opening {
     Move move;
 };
 
-using Moves = std::set<Move>;
+using Moves = std::vector<Move>;
 
 struct OurState {
     OpeningSetup setup;
@@ -155,12 +157,19 @@ std::istream &operator >> (std::istream &instr, Moves &m) {
         try {
             Move mv;
             instr >> mv;
-            m.insert(mv);
+            m.push_back(mv);
         } catch (...) {
             break;
         }
     }
     return instr;
+}
+
+std::ostream &operator << (std::ostream &oustr, Moves &m) {
+    for (auto it : m) {
+        oustr << it << "\n";
+    }
+    return oustr;
 }
 
 std::istream &operator >> (std::istream &instr, OurState &s) {

@@ -9,7 +9,7 @@ CXX=clang++-3.9
 B64=base64/base64.o
 FLAGS=-ferror-limit=1
 
-all: bin/main bin/graphio bin/test_score_eval bin/testgame
+all: bin/main bin/graphio bin/test_score_eval bin/testgame bin/moveio
 
 %.o:: %.c
 	gcc -g -c -o $@ $<
@@ -24,6 +24,9 @@ bin/main: src/main.o src/*.cpp $(OBJS) $(HDRS)
 
 bin/graphio: test/graphio.cpp $(HDRS)
 	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $<
+
+bin/moveio: test/moveio.cpp $(HDRS)
+	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(OBJS)
 
 bin/test_score_eval: test/test_score_eval.cpp src/score_eval.o $(HDRS)
 	$(CXX) $(FLAGS) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(OBJS)
