@@ -46,11 +46,12 @@ def player_turn(p, player_id, prev_player_commands, prev_player_data):
 
 def player_comm(p, player_id, msg):
     (stdoutdata, stderrdata) = p.communicate(msg)
+    dbg ("CPP: {}".format(stderrdata))
     dbg ("SERVER: {}".format(msg))
     player_tokens = stdoutdata.split()
     player_commands = player_tokens[:-1]
     player_data = player_tokens[-1]
-    dbg ("PLAYER: COMMANDS: {} DATA: {}".format(player_commands, player_data))
+    dbg ("PLAYER COMMANDS: {}\n PLAYER DATA: {}".format(player_commands, base64.b64decode(player_data)))
     return (player_commands, player_data)
     p.wait()
 
