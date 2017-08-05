@@ -202,11 +202,6 @@ Move randomTurn(const OurState &s) {
     std::vector<std::pair<SiteID,SiteID> > can_use;
     std::vector<std::pair<SiteID,SiteID> > edges = s.setup.map.getEdges();
 
-    std::cout << "randomTurn from " << edges.size() << "\n";
-    for (auto it : edges) {
-        std::cout << "t " << it.first << "," << it.second << "\n";
-    }
-
     for (auto &it : edges) {
         if (s.setup.map.played_edges.find(it) == s.setup.map.played_edges.end()) {
             can_use.push_back(it);
