@@ -20,7 +20,7 @@ int main() {
         std::ostringstream game_oss;
         std::ostringstream restart_oss;
         restart_oss
-            << "move " << s.setup.moves << " " << take_move << " end\n"
+            << "move " << o.setup.moves << " " << take_move << " end\n"
             << s << "\n";
         continue_game = restart_oss.str();
         std::cout << "continue " << continue_game << "\n";
