@@ -12,50 +12,51 @@
 #include <utility>
 #include <vector>
 
+#include "ourgraph.h"
 #include "score_eval.h"
  
 int main(int, char *[])
 {
-#if 1
-  // Create a graph
-  Graph g;
- 
-  // Add named vertices
-  Vertex v0 = boost::add_vertex(std::string("v0"), g);
-  Vertex v1 = boost::add_vertex(std::string("v1"), g);
-  Vertex v2 = boost::add_vertex(std::string("v2"), g);
-  Vertex v3 = boost::add_vertex(std::string("v3"), g);
- 
-  // Add weighted edges
-  Weight weight0 = 1;
-  Weight weight1 = 1;
-  Weight weight2 = 1;
-  Weight weight3 = 1;
- 
-  boost::add_edge(v0, v1, weight0, g);
-  boost::add_edge(v1, v3, weight1, g);
-  boost::add_edge(v0, v2, weight2, g);
-  boost::add_edge(v2, v3, weight3, g);
- 
-  // At this point the graph is
-  /*    v0
+  // Create game and player graph
+  DumbMap world;
+  std::istringstream world_iss("0 1 2 3 end 0 1 1 3 0 2 2 3 end 0 end");
+
+  world_iss >> world;
+
+  DumbMap player;
+  std::istringstream player_iss("0 1 2 3 end 1 3 0 2 2 3 end 0 end");
+  
+  player_iss >> player;
+
+  /* At this point the game graph is
+        v0
          .
-        / \ 2
+        / \ 
        /   \
       /     . v2
-    5/       \
-    /         \ 4
+     /       \
+    /         \ 
    /           \
   v1----------- v3
-      3
+
   */
 
-  std::set<Vertex> mines;
-  mines.insert(v0);
+  /* And the player graph is:
+        v0
+         .
+          \ 
+           \
+            . v2
+             \
+              \ 
+               \
+  v1----------- v3
+    
+  */
 
-  uint64_t score = score_player_map(g, mines);
+  uint64_t score = score_player_map(world, player);
   std::cout << "Score: " << score << std::endl;
-#endif   
+
   return EXIT_SUCCESS;
 }
  

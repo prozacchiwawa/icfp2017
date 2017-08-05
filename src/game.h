@@ -1,6 +1,7 @@
 #include <set>
 #include <random>
 #include <chrono>
+#include <sstream>
 #include <iostream>
 #include <algorithm>
 
@@ -23,9 +24,9 @@ enum MoveType {
 };
 
 struct ClaimMove {
-    SID source, target;
+    SiteID source, target;
 
-    std::pair<SID,SID> pair() const { return std::make_pair(source, target); }
+    std::pair<SiteID,SiteID> pair() const { return std::make_pair(source, target); }
     
     bool operator < (const ClaimMove &other) const {
         return pair() < other.pair();
@@ -50,7 +51,7 @@ struct Move {
         return m;
     }
 
-    static Move claim(PID n, SID a, SID b) {
+    static Move claim(PID n, SiteID a, SiteID b) {
         Move m = { Claim, n, { a, b } };
         return m;
     }
@@ -67,7 +68,7 @@ using Moves = std::set<Move>;
 struct OurState {
     OpeningSetup setup;
     Moves moves;
-    std::set<std::pair<SID,SID> > edges;    
+    std::set<std::pair<SiteID,SiteID> > edges;    
 
     Move run();
 };
@@ -114,10 +115,12 @@ std::istream &operator >> (std::istream &instr, MoveType &m) {
 std::istream &operator >> (std::istream &instr, ClaimMove &m) {
     instr >> m.source;
     instr >> m.target;
+    return instr;
 }
 
 std::ostream &operator << (std::ostream &oustr, const ClaimMove &m) {
     oustr << m.source << " " << m.target;
+    return oustr;
 }
 
 std::istream &operator >> (std::istream &instr, Move &m) {
@@ -181,15 +184,15 @@ std::ostream &operator << (std::ostream &oustr, const OurState &s) {
 }
 
 Move randomTurn(const OurState &s) {
-    std::vector<std::pair<SID,SID> > can_use;
-    std::vector<std::pair<SID,SID> > edges = s.setup.map.getEdges();
+    std::vector<std::pair<SiteID,SiteID> > can_use;
+    std::vector<std::pair<SiteID,SiteID> > edges = s.setup.map.getEdges();
 
     std::cout << "randomTurn from " << edges.size() << "\n";
     for (auto it : edges) {
         std::cout << "t " << it.first << "," << it.second << "\n";
     }
   
-    std::copy_if(edges.begin(), edges.end(), can_use.begin(), [&] (std::pair<SID,SID> &edge) {
+    std::copy_if(edges.begin(), edges.end(), can_use.begin(), [&] (std::pair<SiteID,SiteID> &edge) {
             auto found = s.edges.find(edge);
             return found != s.edges.end();
         });

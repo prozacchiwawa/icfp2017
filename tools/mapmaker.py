@@ -51,6 +51,7 @@ def longmap_fun(map):
 
 
 # ideas: loop, tree, n-loop(topology)
+# every node is a mine
 
 m = {
     "one" : { "map": onemap, "fun": onemap_fun },
