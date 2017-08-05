@@ -50,9 +50,9 @@ def read_msg(infile):
     with StreamInput(infile) as f:
         str_len = ''.join(itertools.takewhile(lambda x: x != ':', f))
         #print("str_len {}".format(str_len) , file=sys.stderr)
-
         json_len = int(str_len)
         json_str = sys.stdin.read(json_len)
+        dbg ("SERVER_MSG: {}".format(json_str))
         return json.loads(json_str)
 
 def send_ready(f, my_id, state):
