@@ -1,0 +1,2 @@
+sudo tcpdump -A -i eth0 "port 9002"
+
