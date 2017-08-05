@@ -7,6 +7,8 @@
 #include <iostream>
 #include <algorithm>
 
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filter/zlib.hpp>
 #include "ourgraph.h"
 #include "plan.h"
 
@@ -190,12 +192,23 @@ std::istream &operator >> (std::istream &instr, OurState &s) {
     std::vector<char> vec(bsize+1);
     b64_decode(r.c_str(), r.size(), &vec[0]);
     std::istringstream iss(std::string(&vec[0], bsize-1));
-    return iss >> s.setup;
+    boost::iostreams::filtering_streambuf<boost::iostreams::input> in;
+    in.push(boost::iostreams::zlib_decompressor());
+    in.push(iss);
+    auto indecompress = std::istream(&in);
+    return indecompress >> s.setup;
 }
 
 std::ostream &operator << (std::ostream &oustr, const OurState &s) {
     std::ostringstream oss;
-    oss << s.setup;
+    {
+        boost::iostreams::filtering_streambuf<boost::iostreams::output> out;
+        out.push(boost::iostreams::zlib_compressor());
+        out.push(oss);
+        auto outcompress = std::ostream(&out);
+        outcompress << s.setup;
+        std::flush(outcompress);
+    }
     auto ostr = oss.str();
     size_t bsize = b64e_size(ostr.size());
     std::vector<char> vec(bsize+1);
