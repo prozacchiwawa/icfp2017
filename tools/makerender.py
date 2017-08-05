@@ -4,99 +4,35 @@
 import os
 import sys
 import json
+import hashlib
 import BaseHTTPServer
 
-javascript = '''
-var colors = ["#f7eda3","#f7e771","#b8e847","#b8f957","#2fe292", "#6782d3","#516ecc","#4b8ddd","#f2d5ae","#f9a9d7", "#0b9342","#fce5c4","#87d14f","#82f2c7","#eac885", "#fffdad","#abffa8","#907ae8","#e5764e","#53d1ca", "#7951ba","#90e80d","#7fe8ae","#e0320f","#7de8d9", "#fc6cdd","#8c0e12","#dd738c","#3e69c1","#6ae8ab"]
-
-function isclaimed(data, river) {
-    var s = river.source;
-    var t = river.target;
-    if (data.used) {
-        var key = "" + s + "," + t;
-        var v = data.used[key];
-        if (typeof(v) === 'number') { return v; }
-        key = "" + t + "," + s;
-        v = data.used[key];
-        if (typeof(v) === 'number') { return v; }
-    }
-    return null;     
-}
-
-/* add a node with a customized shape 
-   (the Raphael graph drawing implementation can draw this shape, please 
-   consult the RaphaelJS reference for details http://raphaeljs.com/) */
-function render(r, n, fillColor) {
-    /* the Raphael set is obligatory, containing all you want to display */
-    var set = r.set().push(
-        /* custom objects go here */
-        r.rect(n.point[0]-30, n.point[1]-13, 62, 66).attr({"fill": fillColor, "stroke-width": 2, r : "9px"})).push(
-            r.text(n.point[0], n.point[1] + 20, n.label).attr({"font-size":"14px"}));
-    return set;
-};
-function renderLambda(r,n) { return render(r, n, "#DE5B5B"); }
-function renderNormal(r,n) { return render(r, n, "#96F07F"); }
-
-var data = %s;
-var mines = {};
-
-window.onload = function() {
-    console.log('start dracula');
-    var g = new Graph();
- 
-    for (var i = 0; i < data.mines.length; i++) {
-        var mine = data.mines[i];
-        mines[mine] = true;
-    }
-
-    for (var i = 0; i < data.sites.length; i++) {
-        var site = data.sites[i];
-        g.addNode(site.id, { label: mines[site.id] ? "(λ) " + site.id : site.id, render: mines[site.id] ? renderLambda : renderNormal });
-    }
-
-    for (var i = 0; i < data.rivers.length; i++) {
-        var river = data.rivers[i];
-        var claimed = isclaimed(data, river);
-        if (claimed !== null) {
-            var color = colors[claimed %% colors.length];
-            g.addEdge(river.source, river.target, { stroke: "#bfa", fill: color, label: claimed });
-        } else {
-            g.addEdge(river.source, river.target);
-        }
-    }
-/*
-    g.addEdge("strawberry", "cherry");
-    g.addEdge("strawberry", "apple");
-    g.addEdge("strawberry", "tomato");
-    
-    g.addEdge("tomato", "apple");
-    g.addEdge("tomato", "kiwi");
-    
-    g.addEdge("cherry", "apple", { stroke: "#bfa", fill: "#abc", label: "1" });
-    g.addEdge("cherry", "kiwi");
-*/
-    var layouter = new Graph.Layout.Spring(g);
-    layouter.layout();
-    
-    var renderer = new Graph.Renderer.Raphael('canvas', g, 800, 600);
-    renderer.draw();
-    console.log('stop dracula');
-}
-'''
-
-data = {};
+data = {}
+pagenum = 0
+alldata = []
 
 class IndexRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    def doindex(self,pagenum):
+        md5 = hashlib.md5()
+        alldata[pagenum]['page'] = pagenum
+        alldata[pagenum]['pages'] = len(alldata)
+        index_data = open('render/index.html').read() % json.dumps(alldata[pagenum])
+        md5.update(index_data)
+        self.send_response(200)
+        self.send_header('content-type', 'text/html; charset=utf-8')
+        self.send_header('etag', md5.hexdigest())
+        self.end_headers()
+        self.wfile.write(index_data)
+        self.wfile.close()
+            
     def do_GET(self):
         if self.path == '/index.html' or self.path == "/":
-            self.send_response(200)
-            self.send_header('content-type', 'text/html; charset=utf-8')
-            self.end_headers()
-            self.wfile.write(open('render/index.html').read());
-            self.wfile.close()
-        elif self.path == '/index.js':
-            outdata = json.dumps(data)
-            self.wfile.write(javascript % outdata)
+            pagenum = 0
+            self.doindex(pagenum)
+        elif self.path.endswith('.html'):
+            pagenum = int(self.path[1:-5])
+            print ('page %s' % pagenum)
+            self.doindex(pagenum)
         elif self.path.endswith('.js'):
             f = open(os.path.join(os.getcwd(), 'render', self.path[1:])).read()
             self.wfile.write(f)
@@ -106,8 +42,49 @@ class IndexRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.close()
 
 if __name__ == '__main__':
-    data = json.loads(open(sys.argv[1]).read())
+    dataraw = open(sys.argv[1]).read()
+    if dataraw[0] == '{':
+        data = json.loads(dataraw)
+        alldata = [data]
+    else:
+        process = [""]
+        for ll in dataraw.split('\n'):
+            l = ll.strip()
+            if len(l) == 0:
+                continue
+            elif len(l) == 1:
+                process[-1] += l
+            else:
+                if l[:2] == '->' or l[:2] == '<-':
+                    process = process + [l[2:]]
+                else:
+                    process[-1] += l
+        process = filter(lambda x: len(x.strip()) > 0, process)
+        for msg in [json.loads(m) for m in process]:
+            if 'map' in msg:
+                data = msg['map']
+                alldata = [data]
+            elif 'move' in msg or 'stop' in msg:
+                key = 'move'
+                if 'stop' in msg:
+                    key = 'stop'
+                data = json.loads(json.dumps(data))
+                if not 'used' in data:
+                    data['used'] = {}
+                for m in msg[key]['moves']:
+                    if 'claim' in m:
+                        c = m['claim']
+                        data['used']['%s,%s' % (c['source'],c['target'])] = c['punter']
+                alldata = alldata + [data]
+                print 'pages %s' % len(alldata)
+            elif 'claim' in msg:
+                data = json.loads(json.dumps(data))
+                if not 'used' in data:
+                    data['used'] = {}
+                c = msg['claim']
+                data['used']['%s,%s' % (c['source'],c['target'])] = c['punter']
+            else:
+                print msg
+            
     server = BaseHTTPServer.HTTPServer(('0.0.0.0', 8005), IndexRequestHandler)
     server.serve_forever()
-
-    
