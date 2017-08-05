@@ -65,7 +65,6 @@ struct OpeningSetup {
 struct Opening {
     OpeningType ot;
     OpeningSetup setup;
-    Move move;
 };
 
 struct OurState {
@@ -168,7 +167,7 @@ std::istream &operator >> (std::istream &instr, Opening &o) {
     if (o.ot == SetupOp) {
         instr >> o.setup;
     } else {
-        instr >> o.move;
+        instr >> o.setup.moves;
     }
     return instr;
 }
