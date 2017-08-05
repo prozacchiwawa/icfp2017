@@ -59,6 +59,10 @@ def send_ready(f, my_id, state):
     ready_msg = json.dumps({"ready" : my_id, "state":state});
     send_to_server(f, ready_msg)
 
+def send_msg(f, my_id, msg):
+    #ready_msg = json.dumps({"ready" : my_id, "state":state});
+    send_to_server(f, msg)
+
 
 if __name__ == "__main__":
 

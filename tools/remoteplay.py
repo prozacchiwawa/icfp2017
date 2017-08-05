@@ -10,6 +10,7 @@ import io # Needed for Python 2.7 to use Python 3-style open with encoding
 
 import gamerunner
 import play
+import deuglify
 
 def dbg(msg):
     print(msg, file=sys.stderr)
@@ -38,7 +39,7 @@ if "map" in server_msg:
     (player_commands, player_data) = play.player_setup(p, my_id, punters, map)
     #dbg("PLAYER_SETUP_STATE: {}".format(player_data))
     gamerunner.send_ready(sys.stdout, my_id, {"cpp":player_data})
-else:
+elif "move" in server_msg:
     dbg ("MOVE")
     moves = server_msg["move"]
     state = server_msg["state"]["cpp"]
@@ -46,7 +47,20 @@ else:
     (player_commands, player_data) = play.player_turn(p, my_id, moves, state)
     msg = deuglify.decode(player_commands, player_data)
     dbg(msg)
-    gamerunner.send_msg(msg)
+    gamerunner.send_msg(sys.stdout, my_id, msg)
+elif "stop" in server_msg:
+    dbg ("STOP")
+    moves = server_msg["stop"]
+    scores = moves["scores"]
+    dbg("SCORES: {}".format(scores))
+    state = server_msg["state"]["cpp"]
+    p = play.player_run()
+    (player_commands, player_data) = play.player_turn(p, my_id, moves, state)
+    msg = deuglify.decode(player_commands, player_data)
+    dbg(msg)
+    gamerunner.send_msg(sys.stdout, my_id, msg)
+else:
+    raise "unknown server message: {}".format(server_msg)
 
 sys.exit(0)
 

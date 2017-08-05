@@ -7,13 +7,13 @@ def decode(player_commands, player_data):
     cmds = player_commands
     if cmds[0] == "claim":
         msg = {"claim":{"punter":cmds[1], "source":cmds[2], "target":cmds[3]},
-               "state": player_data
+               "state": { "cpp": player_data }
               }
         return json.dumps(msg)
 
     if cmds[0] == "pass":
         msg = {"pass":{"punter":cmds[1]},
-               "state": player_data
+               "state": { "cpp": player_data }
               }
         return json.dumps(msg)
 
