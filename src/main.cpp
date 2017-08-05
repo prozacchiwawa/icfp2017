@@ -23,7 +23,7 @@ int main() {
     }
     auto take_move = o.run();
     o.setup.moves.insert(take_move);
-    std::cout << o.setup.moves << "\n";
+    std::cout << take_move << "\n";
     std::cout << OurState(o) << "\n";
     return 0;
 }
