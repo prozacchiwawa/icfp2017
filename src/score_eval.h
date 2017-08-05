@@ -10,6 +10,6 @@ typedef boost::iterator_property_map < Vertex*, IndexMap, Vertex, Vertex& > Pred
 typedef boost::iterator_property_map < Weight*, IndexMap, Weight, Weight& > DistanceMap;
 typedef boost::iterator_property_map < Weight*, IndexMap, Weight, Weight& > WeightMap;
  
-uint64_t score_player_map(const DumbMap &world, const DumbMap &player);
+uint64_t score_player_map(PID player, const DumbMap &world);
 
 #endif //SCORE_EVAL_H

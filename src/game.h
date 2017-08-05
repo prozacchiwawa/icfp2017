@@ -200,11 +200,11 @@ Move randomTurn(const OurState &s) {
     for (auto it : edges) {
         std::cout << "t " << it.first << "," << it.second << "\n";
     }
-  
-    std::copy_if(edges.begin(), edges.end(), can_use.begin(), [&] (std::pair<SiteID,SiteID> &edge) {
-            auto found = s.edges.find(edge);
-            return found != s.edges.end();
-        });
+
+    for (auto &it : edges) {
+        
+    }
+    
   // obtain a time-based seed:
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 

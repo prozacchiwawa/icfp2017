@@ -21,12 +21,13 @@ int main(int, char *[])
   DumbMap world;
   std::istringstream world_iss("0 1 2 3 end 0 1 1 3 0 2 2 3 end 0 end");
 
+  world.setPunters(1);
+
   world_iss >> world;
 
-  DumbMap player;
-  std::istringstream player_iss("0 1 2 3 end 1 3 0 2 2 3 end 0 end");
-  
-  player_iss >> player;
+  world.addMove(0, "1", "3");
+  world.addMove(0, "0", "2");
+  world.addMove(0, "2", "3");
 
   /* At this point the game graph is
         v0
@@ -54,7 +55,7 @@ int main(int, char *[])
     
   */
 
-  uint64_t score = score_player_map(world, player);
+  uint64_t score = score_player_map(0, world);
   std::cout << "Score: " << score << std::endl;
 
   return EXIT_SUCCESS;

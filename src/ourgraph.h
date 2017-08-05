@@ -24,22 +24,21 @@ using Weight = boost::property<boost::edge_weight_t, int>;
 using Graph = boost::adjacency_list<vecS, vecS, bidirectionalS, VertexStoreType, Weight>;
 using Vertex = boost::graph_traits < Graph >::vertex_descriptor;
 
-typedef boost::graph_traits<Graph>::edge_iterator EdgeIterator;
-typedef std::pair<EdgeIterator, EdgeIterator> EdgePair;
-
 struct DumbMap {
-    Graph g;
+    Graph world;
+    std::vector<Graph> played;
+    std::set<SiteID> mines;
+    
+    std::vector<std::set<SiteID> > player_mines;
 
     std::map<SiteID, Vertex> vertices_by_name;
     std::map<int, SiteID> vertices_by_number;
-    std::set<SiteID> mines;
 
     std::vector<std::pair<SiteID, SiteID> > getEdges() const {
-        EdgePair ep;
         std::vector<std::pair<SiteID, SiteID> > edges;
-        for (ep = boost::edges(g); ep.first != ep.second; ++ep.first) {
-            auto vs1 = boost::source(*ep.first, g);
-            auto vs2 = boost::target(*ep.first, g);
+        for (auto ep = boost::edges(world); ep.first != ep.second; ++ep.first) {
+            auto vs1 = boost::source(*ep.first, world);
+            auto vs2 = boost::target(*ep.first, world);
             auto vs1_by_idx_it = vertices_by_number.find(vs1);
             auto vs2_by_idx_it = vertices_by_number.find(vs2);
             if (vs1_by_idx_it == vertices_by_number.end() ||
@@ -48,27 +47,35 @@ struct DumbMap {
             }
             auto vs1_by_idx = *vs1_by_idx_it;
             auto vs2_by_idx = *vs2_by_idx_it;
-            edges.push_back(std::make_pair(vs1_by_idx.second, vs2_by_idx.second));
+            if (vs1_by_idx.second < vs2_by_idx.second) {
+                edges.push_back(std::make_pair(vs1_by_idx.second, vs2_by_idx.second));
+            } else {
+                edges.push_back(std::make_pair(vs2_by_idx.second, vs1_by_idx.second));
+            }                
         }
         return edges;
     }
 
-#if 0
-    std::vector<std::pair<SiteID, SiteID> > getEdges() const {
-        std::vector<std::pair<SiteID, SiteID> > edges;
-        boost::graph_traits<Graph>::vertex_iterator v, v_end;
-        for (boost::tie(v, v_end) = boost::vertices(g); v != v_end; ++v) {
-            boost::graph_traits<Graph>::out_edge_iterator e, e_end;
-            for (boost::tie(e, e_end) = boost::out_edges(*v, g); e != e_end; ++e) {
-                SiteID vs1 = boost::source(*e, g);
-                SiteID vs2 = boost::target(*e, g);
-                edges.push_back(std::make_pair(vs1, vs2));
-            }
-        }
-        return edges;
+    void setPunters(int all) {
+        player_mines.resize(all);
+        played.resize(all);
     }
-#endif
 
+    void addMove(PID punter, const std::string &a, const std::string &b) {
+        auto a_it = vertices_by_name.find(a);
+        auto b_it = vertices_by_name.find(b);
+        if (a_it == vertices_by_name.end() || b_it == vertices_by_name.end()) {
+            throw std::exception();
+        }
+        auto a_v = *a_it;
+        auto b_v = *b_it;
+        auto &playerg = played[punter];
+        if (a < b) {
+            boost::add_edge(a_v.second, b_v.second, 1, played[punter]);
+        } else {
+            boost::add_edge(b_v.second, a_v.second, 1, played[punter]);
+        }
+    }
 };
 
 namespace {
@@ -78,7 +85,7 @@ std::istream &operator >> (std::istream &instr, DumbMap &m) {
     while (true) {
         instr >> r;
         if (r != "end") {
-            auto v = boost::add_vertex(r, m.g);
+            auto v = boost::add_vertex(r, m.world);
             m.vertices_by_number[v] = r;
             m.vertices_by_name[r] = v;
         } else {
@@ -89,7 +96,7 @@ std::istream &operator >> (std::istream &instr, DumbMap &m) {
         instr >> r;
         if (r != "end") {
             instr >> s;
-            boost::add_edge(m.vertices_by_name[r], m.vertices_by_name[s], 1, m.g);
+            boost::add_edge(m.vertices_by_name[r], m.vertices_by_name[s], 1, m.world);
         } else {
             break;
         };
@@ -108,14 +115,14 @@ std::istream &operator >> (std::istream &instr, DumbMap &m) {
 
 std::ostream &operator << (std::ostream &oustr, const DumbMap &m) {
     boost::graph_traits<Graph>::vertex_iterator v, v_end;
-    for (boost::tie(v, v_end) = boost::vertices(m.g); v != v_end; ++v) {
+    for (boost::tie(v, v_end) = boost::vertices(m.world); v != v_end; ++v) {
         oustr << *v << " ";
     }
     oustr << "\nend\n";
-    for (boost::tie(v, v_end) = boost::vertices(m.g); v != v_end; ++v) {
+    for (boost::tie(v, v_end) = boost::vertices(m.world); v != v_end; ++v) {
         boost::graph_traits<Graph>::out_edge_iterator e, e_end;
-        for (boost::tie(e, e_end) = boost::out_edges(*v, m.g); e != e_end; ++e) {
-            oustr << boost::source(*e, m.g) << " " << boost::target(*e, m.g) << "\n";
+        for (boost::tie(e, e_end) = boost::out_edges(*v, m.world); e != e_end; ++e) {
+            oustr << boost::source(*e, m.world) << " " << boost::target(*e, m.world) << "\n";
         }
     }
     oustr << "end\n";

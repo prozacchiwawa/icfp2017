@@ -41,7 +41,7 @@ public:
 
 // Note: this will be slow as hell if we don't memoize this
 std::map<SiteID,std::set<SiteID> > player_mine_connected_paths(const DumbMap& pg) {
-  const Graph& player_graph = pg.g;
+  const Graph& player_graph = pg.world;
   std::vector<std::pair<SiteID, SiteID> > paths;
   std::map<SiteID,std::set<SiteID> > reach_map;
   
@@ -62,19 +62,20 @@ std::map<SiteID,std::set<SiteID> > player_mine_connected_paths(const DumbMap& pg
 }
 
 
-uint64_t score_player_map(const DumbMap& dg,
-                          const DumbMap& pg) {
+uint64_t score_player_map(PID punter, const DumbMap& d) {
 
   uint64_t score = 0;
 
   std::set<SiteID>::iterator it;
+  auto &mines = d.player_mines[punter];
+  auto &pg = d.played[punter];
 
-  for (it = pg.mines.begin(); it != pg.mines.end(); ++it) {
+  for (it = mines.begin(); it != mines.end(); ++it) {
   
-    auto &g = dg.g;
-    auto &player_graph = pg.g;
-    auto v0_it = dg.vertices_by_name.find(*it);
-    if (v0_it == dg.vertices_by_name.end()) {
+    auto &g = d.world;
+    auto &player_graph = pg;
+    auto v0_it = d.vertices_by_name.find(*it);
+    if (v0_it == d.vertices_by_name.end()) {
       throw std::exception();
     }
     auto v0 = *v0_it;
@@ -93,8 +94,8 @@ uint64_t score_player_map(const DumbMap& dg,
  
     BGL_FORALL_VERTICES(v, g, Graph)
       {
-        auto v1_it = dg.vertices_by_number.find(v);
-        if (v1_it == dg.vertices_by_number.end()) {
+        auto v1_it = d.vertices_by_number.find(v);
+        if (v1_it == d.vertices_by_number.end()) {
           throw std::exception();
         }
         auto v1 = *v1_it;
