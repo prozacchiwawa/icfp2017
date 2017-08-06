@@ -10,6 +10,7 @@
 #include <boost/variant/get.hpp>
 #include "boost/graph/adjacency_list.hpp"
 #include "boost/graph/topological_sort.hpp"
+#include <boost/graph/kruskal_min_spanning_tree.hpp>
 #include <boost/graph/labeled_graph.hpp>
 
 using PID = int; // punter id
@@ -176,6 +177,7 @@ std::istream &operator >> (std::istream &instr, DumbMap &m) {
             break;
         }
     }
+    
     return instr;
 }
 
@@ -201,6 +203,7 @@ std::ostream &operator << (std::ostream &oustr, const DumbMap &m) {
         oustr << it << " ";
     }
     oustr << "end\n";
+    
     return oustr;
 }
 }

@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
             Opening o;
             begin_game >> o;
             if (o.ot == SetupOp) {
+                o.setupFinalize();
                 auto edges = o.setup.map.getEdges();
                 numEdges = edges.size();
                 auto streamAt = begin_game.tellg();
@@ -78,7 +79,7 @@ int main(int argc, char **argv) {
                     }
                 }
                 game_oss << "end\n";
-                game_oss << continue_it->second;
+                game_oss << continue_it->second << "\n";
             }
             
             continue_game = game_oss.str();
@@ -93,7 +94,7 @@ int main(int argc, char **argv) {
         std::istringstream last_read("move end\n" + continue_game);
         last_read >> last;
         last_read >> os;
-        auto score = score_player_map(i, last.setup.map);
+        auto score = score_player_map(i, last.setup.weights, last.setup.map);
         std::cout << "player " << i << " score " << score << "\n";
     }
     

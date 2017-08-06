@@ -63,6 +63,7 @@ struct OpeningSetup {
     size_t punters;
     DumbMap map;
     Moves moves;
+    std::map<SiteID, std::vector<uint32_t> > weights;
 };
 
 struct Opening {
@@ -70,6 +71,7 @@ struct Opening {
     OpeningSetup setup;
 
     Move run();
+    void setupFinalize();
 };
 
 struct OurState {
@@ -78,6 +80,34 @@ struct OurState {
 };
 
 namespace {
+std::istream &operator >> (std::istream &instr, std::map<std::string, std::vector<uint32_t> > &weights) {
+    std::string label;
+    instr >> label;
+    while (label != "end") {
+        int size;
+        char c;
+        auto &ref = weights[label];
+        instr.get(c);
+        instr.read(reinterpret_cast<char*>(&size), sizeof(size));
+        ref.resize(size / sizeof(uint32_t));
+        instr.read(reinterpret_cast<char*>(&ref[0]), size);
+        instr >> label;
+    }
+    return instr;
+}
+
+std::ostream &operator << (std::ostream &oustr, const std::map<std::string, std::vector<uint32_t> > &weights) {
+    for (auto &it : weights) {
+        auto &ref = it.second;
+        int size = sizeof(uint32_t) * ref.size();
+        oustr << it.first << " ";
+        oustr.write(reinterpret_cast<const char*>(&size), sizeof(size));
+        oustr.write(reinterpret_cast<const char*>(&(it.second[0])), size);
+    }
+    oustr << "end\n";
+    return oustr;
+}
+
 std::istream &operator >> (std::istream &instr, OpeningType &o) {
     std::string r;
     instr >> r;
@@ -190,13 +220,14 @@ std::istream &operator >> (std::istream &instr, OurState &s) {
     size_t bsize = b64d_size(r.size());
     std::vector<char> vec(bsize+1);
     b64_decode(r.c_str(), r.size(), &vec[0]);
-    std::istringstream iss(std::string(&vec[0], bsize-1));
-    return iss >> s.setup;
+    auto str = std::string(&vec[0], bsize);
+    std::istringstream iss(str);
+    return iss >> s.setup >> s.setup.weights;
 }
 
 std::ostream &operator << (std::ostream &oustr, const OurState &s) {
     std::ostringstream oss;
-    oss << s.setup;
+    oss << s.setup << s.setup.weights;
     auto ostr = oss.str();
     size_t bsize = b64e_size(ostr.size());
     std::vector<char> vec(bsize+1);
@@ -228,3 +259,8 @@ Move randomTurn(const Opening &s) {
     }
 }
 }
+
+void generateMineWeights
+    (std::string mine,
+     std::map<std::string, std::vector<uint32_t> > &weights,
+     const DumbMap &map);
