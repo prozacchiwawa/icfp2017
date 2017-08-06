@@ -43,6 +43,7 @@ void Opening::setupFinalize() {
         auto v0 = it;
         generateMineWeights(v0, setup.weights, setup.map);
     }
+    setup.planner.initPlans(*this);
 }
 
 void Opening::generateDandelionLine(SiteID v0, std::set<SiteID> &candidates) const {
@@ -127,4 +128,27 @@ void Opening::gradientToMine(SiteID v0, SiteID from, std::vector<SiteID> &line) 
             line.push_back(vtx_name);
         }
     }
+}
+
+// NOTE: Don't add local serialized state here, add it to readEncodedSetup
+std::istream &readSetup(std::istream &instr, Opening &o) {
+    instr >> o.setup.punter;
+    instr >> o.setup.punters;
+    instr >> o.setup.map;
+    instr >> o.setup.moves;
+    
+    o.setup.map.setPunters(o.setup.punters);
+    for (auto &it : o.setup.moves) {
+        if (it.moveType == Claim) {
+            o.setup.map.addMove(it.punter, it.claimMove.source, it.claimMove.target);
+        }
+    }
+    
+    return instr;
+}
+
+// NOTE: Don't add local serialized state here, add it to writeEncodedSetup
+std::ostream &writeSetup(std::ostream &oustr, const Opening &o) {
+    oustr << o.setup.punter << " " << o.setup.punters << " " << o.setup.map << " " << o.setup.moves << "\n";
+    return oustr;
 }

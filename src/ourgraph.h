@@ -13,8 +13,8 @@
 #include <boost/graph/kruskal_min_spanning_tree.hpp>
 #include <boost/graph/labeled_graph.hpp>
 
-using PID = int; // punter id
-using SiteID = std::string;
+#include "types.h"
+
 using vecS = boost::vecS;
 using bidirectionalS = boost::bidirectionalS;
 using VertexStoreType = boost::property<boost::vertex_name_t, SiteID>;

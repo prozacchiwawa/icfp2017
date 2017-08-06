@@ -1,9 +1,14 @@
 #pragma once
 
+#include <set>
+#include <string>
 #include <queue>
-#include "game.h"
+#include <memory>
+#include "types.h"
+#include "ourgraph.h"
 
 class Opening;
+class DumbMap;
 
 class Edge {
 public:
@@ -56,6 +61,7 @@ public:
     virtual int currentCost() const = 0;
     virtual void addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) = 0;
 
+    virtual std::string name() const = 0;
     virtual std::string serialize() const = 0;
 
     bool operator < (const BuildPlan &other) const {
@@ -85,6 +91,7 @@ public:
     int currentCost() const override;
     void addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) override;
 
+    std::string name() const override { return "dandelion"; }
     std::string serialize() const override;
 
 private:
@@ -105,6 +112,10 @@ std::ostream &operator << (std::ostream &oustr, const DandelionPlan &bp);
 class Planner {
 public:
     void initPlans(Opening &op);
+    std::shared_ptr<BuildPlan> current() const;
+
+    std::istream &read(std::istream &instr, const Opening &o);
+    std::ostream &write(std::ostream &oustr, const Opening &o) const;
     
-    std::priority_queue<BuildPlan> plans;
+    std::priority_queue<std::shared_ptr<BuildPlan> > plans;
 };

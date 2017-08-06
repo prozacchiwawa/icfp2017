@@ -24,16 +24,16 @@ int main(int argc, char **argv) {
                 numEdges = edges.size();
                 begin_game >> o.setup.moves;
             } else {
-                OurState os(o);
-                begin_game >> os;
+                readEncodedSetup(begin_game, o);
             }
             auto take_move = o.run();
             std::ostringstream game_oss;
             std::ostringstream restart_oss;
             o.setup.moves.insert(take_move);
             restart_oss
-                << "move " << o.setup.moves
-                << OurState(o) << "\n";
+                << "move " << o.setup.moves << " ";
+            writeEncodedSetup(restart_oss, o);
+            restart_oss << "\n";
             continue_game = restart_oss.str();
             std::cout << "continue " << continue_game << "\n";
         }

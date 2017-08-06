@@ -20,8 +20,7 @@ int main() {
         o.setupFinalize();
     } else {
         // Only make a move during the main loop, not during setup
-        OurState os(o);
-        std::cin >> os;
+        readEncodedSetup(std::cin, o);
         auto take_move = o.run();
         o.setup.moves.insert(take_move);
         std::cout << take_move << "\n";
@@ -29,7 +28,8 @@ int main() {
     }
 
     // Always send state
-    std::cout << OurState(o) << "\n";
+    writeEncodedSetup(std::cout, o);
+    std::cout << "\n";
 
     return 0;
 }

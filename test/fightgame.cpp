@@ -43,8 +43,7 @@ int main(int argc, char **argv) {
                 std::cerr << "begin_game: at " << streamAt << " next " << nextWord << "\n";
                 begin_game >> o.setup.moves;
             } else {
-                OurState os(o);
-                begin_game >> os;
+                readEncodedSetup(begin_game, o);
             }
 
             auto whichPlayer = i % numPlayers;
@@ -55,7 +54,7 @@ int main(int argc, char **argv) {
             moves_since_last[whichPlayer] = take_move;
 
             std::ostringstream restart_oss;
-            restart_oss << OurState(o);
+            writeEncodedSetup(restart_oss, o);
             continue_state[whichPlayer] = restart_oss.str();
 
             std::ostringstream game_oss;
@@ -64,7 +63,9 @@ int main(int argc, char **argv) {
             
             auto continue_it = continue_state.find(nextPlayer);
             if (continue_it == continue_state.end()) {
-                game_oss << "setup " << o.setup << "\n";
+                game_oss << "setup ";
+                writeSetup(game_oss, o);
+                game_oss << "\n";
                 for (auto &it : moves_since_last) {
                     if (it.first != nextPlayer) {
                         game_oss << it.second << " ";
@@ -89,11 +90,10 @@ int main(int argc, char **argv) {
 
     for (auto i = 0; i < numPlayers; i++) {
         Opening last;
-        OurState os(last);
         auto continue_game = continue_state[i];
         std::istringstream last_read("move end\n" + continue_game);
         last_read >> last;
-        last_read >> os;
+        readEncodedSetup(last_read, last);
         auto score = score_player_map(i, last.setup.weights, last.setup.map);
         std::cout << "player " << i << " score " << score << "\n";
     }

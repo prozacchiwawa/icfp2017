@@ -7,20 +7,13 @@
 #include <iostream>
 #include <algorithm>
 
+#include "types.h"
 #include "ourgraph.h"
 #include "plan.h"
 
 extern "C" {
     #include "base64.h"
 }
-
-enum OpeningType {
-    SetupOp, MoveOp
-};
-
-enum MoveType {
-    Claim, Pass
-};
 
 struct ClaimMove {
     SiteID source, target;
@@ -63,6 +56,7 @@ struct OpeningSetup {
     size_t punters;
     DumbMap map;
     Moves moves;
+    Planner planner;
     std::map<SiteID, std::vector<uint32_t> > weights;
 };
 
@@ -75,13 +69,15 @@ struct Opening {
 
     void generateDandelionLine(SiteID mine, std::set<SiteID> &vertices) const;
     void gradientToMine(SiteID v0, SiteID from, std::vector<SiteID> &line) const;
-    std::string vtx_name(unsigned int idx);
 };
 
 struct OurState {
     OurState(Opening &o) : setup(o.setup) { }
     OpeningSetup &setup;
 };
+
+std::istream &readSetup(std::istream &instr, Opening &o);
+std::ostream &writeSetup(std::ostream &oustr, const Opening &os);
 
 namespace {
 std::istream &operator >> (std::istream &instr, std::map<std::string, std::vector<uint32_t> > &weights) {
@@ -188,29 +184,10 @@ std::ostream &operator << (std::ostream &oustr, const Moves &m) {
     return oustr;
 }
 
-std::istream &operator >> (std::istream &instr, OpeningSetup &os) {
-    instr >> os.punter;
-    instr >> os.punters;
-    instr >> os.map;
-    instr >> os.moves;
-    
-    os.map.setPunters(os.punters);
-    for (auto &it : os.moves) {
-        if (it.moveType == Claim) {
-            os.map.addMove(it.punter, it.claimMove.source, it.claimMove.target);
-        }
-    }
-    return instr;
-}
-
-std::ostream &operator << (std::ostream &oustr, const OpeningSetup &os) {
-    return oustr << os.punter << " " << os.punters << " " << os.map << " " << os.moves;
-}
-
 std::istream &operator >> (std::istream &instr, Opening &o) {
     instr >> o.ot;
     if (o.ot == SetupOp) {
-        instr >> o.setup;
+        readSetup(instr, o);
     } else {
         instr >> o.setup.moves;
     }
@@ -224,12 +201,16 @@ std::string frombase64(const std::string &r) {
     return std::string(&vec[0], bsize);
 }
 
-std::istream &operator >> (std::istream &instr, OurState &s) {
+// Local precomputation should follow readSetup
+std::istream &readEncodedSetup(std::istream &instr, Opening &s) {
     std::string r;
     instr >> r;
     auto str = frombase64(r);
     std::istringstream iss(str);
-    return iss >> s.setup >> s.setup.weights;
+    readSetup(iss, s);
+    iss >> s.setup.weights;
+    s.setup.planner.read(iss, s);
+    return instr;
 }
 
 std::string tobase64(const std::string &ostr) {
@@ -239,9 +220,12 @@ std::string tobase64(const std::string &ostr) {
     return std::string(&vec[0], vec.size()-1);
 }
 
-std::ostream &operator << (std::ostream &oustr, const OurState &s) {
+// Local precomputation should follow writeSetup
+std::ostream &writeEncodedSetup(std::ostream &oustr, const Opening &o) {
     std::ostringstream oss;
-    oss << s.setup << s.setup.weights;
+    writeSetup(oss, o);
+    oss << o.setup.weights;
+    o.setup.planner.write(oss, o);
     auto ostr = oss.str();
     return oustr << tobase64(ostr);
 }

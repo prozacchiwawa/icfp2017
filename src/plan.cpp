@@ -230,3 +230,55 @@ double DandelionPlan::computeScore(PID punter, SiteID mine, const Graph &player_
 std::ostream &operator << (std::ostream &oustr, const DandelionPlan &dp) {
     return oustr << dp.serialize();
 }
+
+void Planner::initPlans(Opening &o) {
+    std::map<SiteID, std::set<SiteID> > whereToBuild;
+    for (auto &mine_it : o.setup.map.mines) {
+        auto &build_ref = whereToBuild[mine_it];
+        o.generateDandelionLine(mine_it, build_ref);
+        for (auto &d_at : build_ref) {
+            std::vector<SiteID> dplan;
+            o.gradientToMine(mine_it, d_at, dplan);
+            auto dp = std::make_shared<DandelionPlan>(0, d_at, mine_it, dplan, o);
+            plans.push(dp);
+        }
+    }
+}
+
+std::shared_ptr<BuildPlan> Planner::current() const {
+    if (plans.empty()) {
+        return std::shared_ptr<BuildPlan>();
+    } else {
+        return plans.top();
+    }
+}
+
+std::istream &Planner::read(std::istream &instr, const Opening &o) {
+    std::string ty;
+    instr >> ty;
+    while (ty != "end") {
+        if (ty == "dandelion") {
+            instr >> ty;
+            auto dp = std::make_shared<DandelionPlan>(ty, o);
+            plans.push(dp);
+        } else {
+            std::string enc;
+            instr >> enc;
+            std::cerr << "skipping unknown " << ty << " " << enc << "\n";
+            throw std::exception();
+        }
+        instr >> ty;
+    }
+    return instr;
+}
+
+std::ostream &Planner::write(std::ostream &oustr, const Opening &o) const {
+    auto planner_copy = o.setup.planner.plans;
+    while (!planner_copy.empty()) {
+        auto p = planner_copy.top();
+        planner_copy.pop();
+        oustr << p->name() << " " << p->serialize() << "\n";
+    }
+    oustr << "end\n";
+    return oustr;
+}
