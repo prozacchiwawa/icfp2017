@@ -41,7 +41,7 @@ def player_setup(p, player_id, num_players, map):
 
 # Input state is turns from last time, plus player state from last time
 def player_turn(p, player_id, prev_player_commands, prev_player_data):
-    msg  = "move pass 1 {} {}".format(' '.join(prev_player_commands), prev_player_data)
+    msg  = "move {} {}".format(' '.join(prev_player_commands), prev_player_data)
     return player_comm(p, player_id, msg)
 
 def player_comm(p, player_id, msg):
