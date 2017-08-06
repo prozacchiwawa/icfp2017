@@ -11,6 +11,17 @@ Move Opening::run() {
     // Run plans
     auto plan = setup.planner.current();
     std::vector<Edge> scores;
+    if (plan) {
+        std::cerr << "have-plan " << plan->currentCost() << " " << plan->scoreWhenComplete() << " " << plan->name() << " " << plan->serialize() << "\n";
+        
+    }
+    auto queue_copy = setup.planner.plans;
+    while (!queue_copy.empty()) {
+        auto e = queue_copy.top();
+        queue_copy.pop();
+        std::cerr << "plan " << plan->currentCost() << " " << plan->scoreWhenComplete() << " " << plan->name() << " " << plan->serialize() << "\n";
+    }
+    
     auto suggested = plan ? plan->recommendMoves() : std::vector<Edge>();
     std::transform(suggested.begin(), suggested.end(), std::back_inserter(scores), [&] (const Edge &e) {
         auto f = e;

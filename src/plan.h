@@ -73,12 +73,11 @@ public:
     virtual std::string serialize() const = 0;
 
     bool operator < (const BuildPlan &other) const {
-        auto cost_ratio = scoreWhenComplete() / (double)currentCost();
-        auto other_cost_ratio = other.scoreWhenComplete() / (double)other.currentCost();
+        auto cost_ratio = scoreWhenComplete();
+        auto other_cost_ratio = other.scoreWhenComplete();
         return cost_ratio > other_cost_ratio;
     }
 };
-
 
 class DandelionPlan : public BuildPlan {
 public:
@@ -116,6 +115,33 @@ private:
 };
 
 std::ostream &operator << (std::ostream &oustr, const DandelionPlan &bp);
+
+class TestPlan : public BuildPlan {
+public:
+    TestPlan(PID punter);
+    TestPlan(const std::string &serialize, const Opening &world);
+    
+    std::vector<Edge> recommendMoves() const override;
+    double scoreWhenComplete() const override;
+    double currentScore() const;
+    bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const override;
+    int totalCost() const override;
+    int currentCost() const override;
+    void addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) override;
+
+    std::string name() const override { return "test"; }
+    std::string serialize() const override;
+
+private:
+    void construct();
+    std::set<std::pair<SiteID, SiteID> >
+        generateRecommendedMoves(const SiteID &v0, const SiteID &mine, const Opening &o);
+    double computeScore(PID punter, SiteID mine, const Graph &player_graph, const Opening &o);
+
+    PID punter;
+    int cost_max;
+    std::set<std::pair<SiteID, SiteID> > edges;
+};
 
 class Planner {
 public:

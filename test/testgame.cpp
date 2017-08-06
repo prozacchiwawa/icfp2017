@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
                 auto edges = o.setup.map.getEdges();
                 numEdges = edges.size();
                 begin_game >> o.setup.moves;
+                o.setupFinalize();
             } else {
                 readEncodedSetup(begin_game, o);
             }
