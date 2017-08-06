@@ -28,6 +28,7 @@ server_msg = gamerunner.read_msg(sys.stdin)
 my_id = None
 punters = 0
 map = None
+state = None # Used to pass state into cpp from final stop message
 
 if "map" in server_msg:
     init_state = server_msg
@@ -51,10 +52,9 @@ elif "move" in server_msg:
     gamerunner.send_msg(sys.stdout, my_id, msg)
 elif "stop" in server_msg:
     dbg ("STOP")
-    moves = server_msg["stop"]
-    scores = moves["scores"]
+    moves = server_msg["stop"]["moves"]
+    scores = moves["stop"]["scores"]
     dbg("SCORES: {}".format(scores))
-    #state = server_msg["state"]["cpp"]
     p = play.player_run()
     (player_commands, player_data) = play.player_turn(p, my_id, moves, state)
     msg = deuglify.decode(player_commands, player_data)
