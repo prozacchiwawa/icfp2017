@@ -47,6 +47,11 @@ int main(int argc, char **argv) {
                     std::cout
                         << "Reread dandelion " << d_at << "\n"
                         << rp << "\n";
+                    std::cout << "Dandelion edges\n";
+                    auto edges = dp.recommendMoves();
+                    for (auto &e : edges) {
+                        std::cout << e.a << "," << e.b << "\n";
+                    }
                 }
             }
         }
