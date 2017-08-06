@@ -43,6 +43,21 @@ void Opening::setupFinalize() {
         auto v0 = it;
         generateMineWeights(v0, setup.weights, setup.map);
     }
+
+    for (auto &vtx_it : setup.map.vertices_by_name) {
+        auto vtx = vtx_it.second;
+        Graph::out_edge_iterator ei, ei_end;
+        boost::tie (ei,ei_end) = boost::out_edges(vtx, setup.map.world);
+        std::cerr << "V: " << vtx << " edges: ";
+        uint64_t num_edges = 0;
+        for (; ei != ei_end; ei++) {
+          std::cerr << "(" << source(*ei, setup.map.world) << "," << 
+              target (*ei, setup.map.world) << ") ";
+          num_edges++;
+        }
+        setup.branches[vtx_it.first] = num_edges;
+        std::cerr << std::endl;
+    }
 }
 
 void Opening::generateDandelionLine(SiteID v0, std::set<SiteID> &candidates) const {
