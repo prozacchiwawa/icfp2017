@@ -60,8 +60,13 @@ elif "stop" in server_msg:
     msg = deuglify.decode(player_commands, player_data)
     dbg(msg)
     gamerunner.send_msg(sys.stdout, my_id, msg)
+elif "timeout" in server_msg:
+    state = server_msg["state"]["cpp"]
+    # Should we call the client in this case?
+    pass
 else:
-    raise "unknown server message: {}".format(server_msg)
+    pass
+    #raise "unknown server message: {}".format(server_msg)
 
 sys.exit(0)
 
