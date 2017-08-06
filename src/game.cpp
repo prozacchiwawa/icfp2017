@@ -32,6 +32,7 @@ void generateMineWeights
     }
     auto v0_idx = v0_idx_it->second;
     auto &world_distances = weights[mine];
+    std::cerr << "map-size " << map.vertices_by_name.size() << "\n";
     world_distances.assign
         (map.vertices_by_name.size(), std::numeric_limits<int>::max());
     boost::dijkstra_shortest_paths

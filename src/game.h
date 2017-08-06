@@ -85,8 +85,10 @@ std::istream &operator >> (std::istream &instr, std::map<std::string, std::vecto
     instr >> label;
     while (label != "end") {
         int size;
-        instr >> size;
+        char c;
         auto &ref = weights[label];
+        instr.get(c);
+        instr.read(reinterpret_cast<char*>(&size), sizeof(size));
         ref.resize(size / sizeof(uint32_t));
         instr.read(reinterpret_cast<char*>(&ref[0]), size);
         instr >> label;
@@ -96,8 +98,10 @@ std::istream &operator >> (std::istream &instr, std::map<std::string, std::vecto
 
 std::ostream &operator << (std::ostream &oustr, const std::map<std::string, std::vector<uint32_t> > &weights) {
     for (auto &it : weights) {
-        int size = sizeof(uint32_t) * weights.size();
-        oustr << it.first << " " << size << " ";
+        auto &ref = it.second;
+        int size = sizeof(uint32_t) * ref.size();
+        oustr << it.first << " ";
+        oustr.write(reinterpret_cast<const char*>(&size), sizeof(size));
         oustr.write(reinterpret_cast<const char*>(&(it.second[0])), size);
     }
     oustr << "end\n";
@@ -185,7 +189,6 @@ std::istream &operator >> (std::istream &instr, OpeningSetup &os) {
     instr >> os.punters;
     instr >> os.map;
     instr >> os.moves;
-    instr >> os.weights;
     
     os.map.setPunters(os.punters);
     for (auto &it : os.moves) {
@@ -197,7 +200,7 @@ std::istream &operator >> (std::istream &instr, OpeningSetup &os) {
 }
 
 std::ostream &operator << (std::ostream &oustr, const OpeningSetup &os) {
-    return oustr << os.punter << " " << os.punters << " " << os.map << " " << os.moves << os.weights;
+    return oustr << os.punter << " " << os.punters << " " << os.map << " " << os.moves;
 }
 
 std::istream &operator >> (std::istream &instr, Opening &o) {
@@ -216,13 +219,14 @@ std::istream &operator >> (std::istream &instr, OurState &s) {
     size_t bsize = b64d_size(r.size());
     std::vector<char> vec(bsize+1);
     b64_decode(r.c_str(), r.size(), &vec[0]);
-    std::istringstream iss(std::string(&vec[0], bsize-1));
-    return iss >> s.setup;
+    auto str = std::string(&vec[0], bsize);
+    std::istringstream iss(str);
+    return iss >> s.setup >> s.setup.weights;
 }
 
 std::ostream &operator << (std::ostream &oustr, const OurState &s) {
     std::ostringstream oss;
-    oss << s.setup;
+    oss << s.setup << s.setup.weights;
     auto ostr = oss.str();
     size_t bsize = b64e_size(ostr.size());
     std::vector<char> vec(bsize+1);

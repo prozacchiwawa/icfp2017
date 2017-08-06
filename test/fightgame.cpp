@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
             Opening o;
             begin_game >> o;
             if (o.ot == SetupOp) {
+                o.setupFinalize();
                 auto edges = o.setup.map.getEdges();
                 numEdges = edges.size();
                 auto streamAt = begin_game.tellg();
@@ -78,7 +79,7 @@ int main(int argc, char **argv) {
                     }
                 }
                 game_oss << "end\n";
-                game_oss << continue_it->second;
+                game_oss << continue_it->second << "\n";
             }
             
             continue_game = game_oss.str();
