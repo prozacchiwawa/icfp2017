@@ -79,6 +79,7 @@ public:
     
     std::vector<Edge> recommendMoves() const override;
     double scoreWhenComplete() const override;
+    double currentScore() const;
     bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const override;
     int totalCost() const override;
     int currentCost() const override;
@@ -96,6 +97,7 @@ private:
     std::set<std::pair<SiteID, SiteID> > edges;
     int currentCostVal;
     double scoreWhenCompleteVal;
+    double currentScoreVal;
 };
 
 std::ostream &operator << (std::ostream &oustr, const DandelionPlan &bp);

@@ -1,8 +1,9 @@
 
 
 # To run an online mode game:
-tools/rungame <port_num>
-
+```
+~/icfp2017/tools$ tools/rungame <port_num>
+```
 
 # Viewing sample games:
 
@@ -11,3 +12,4 @@ to view it:
 ```
 aqk@ubuntu:~/icfp2017/tools$ (cd tools; python makerender.py ../examples/sample-game-render.txt)
 ```
+Then go to:  http://localhost:8005/

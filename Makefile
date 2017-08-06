@@ -41,7 +41,7 @@ bin/fightgame: test/fightgame.cpp $(OBJS) $(HDRS)
 	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/fightgame.cpp $(OBJS) $(LIBS)
 
 bin/testdandelion: test/testdandelion.cpp $(OBJS) $(HDRS)
-	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/fightgame.cpp $(OBJS) $(LIBS)
+	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/testdandelion.cpp $(OBJS) $(LIBS)
 
 bin:
 	mkdir -p bin

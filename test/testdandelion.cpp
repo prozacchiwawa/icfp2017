@@ -31,7 +31,11 @@ int main(int argc, char **argv) {
                 std::cout << "Dandelions for " << mine_it << "\n";
                 for (auto &d_at : build_ref) {
                     std::vector<SiteID> dplan;
-                    gradientToMine(mine, d_at, dplan);
+                    o.gradientToMine(mine_it, d_at, dplan);
+                    std::cout << "gradient to mine " << mine_it << " from " << d_at << "\n";
+                    for (auto &gtm : dplan) {
+                        std::cout << gtm << "\n";
+                    }
                     DandelionPlan dp(0, d_at, mine_it, dplan, o);
                     std::ostringstream oss;
                     oss << dp;
