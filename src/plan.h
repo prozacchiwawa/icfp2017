@@ -3,6 +3,8 @@
 #include <queue>
 #include "game.h"
 
+class Opening;
+
 class Edge {
 public:
     std::string a;
@@ -49,10 +51,10 @@ class BuildPlan {
 public:
     virtual std::vector<Edge> recommendMoves() const = 0;
     virtual double scoreWhenComplete() const = 0;
-    virtual double presentScore() const = 0;
-    virtual bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move) const = 0;
+    virtual bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const = 0;
     virtual int totalCost() const = 0;
     virtual int currentCost() const = 0;
+    virtual void addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) = 0;
 
     virtual std::string serialize() const = 0;
 
@@ -63,13 +65,12 @@ public:
     }
 };
 
-class Opening;
 
 class DandelionPlan : public BuildPlan {
 public:
     DandelionPlan
         (PID punter,
-         const SiteID &v0,
+         SiteID v0,
          const SiteID &mine,
          const std::vector<SiteID> &path,
          const Opening &world);
@@ -78,16 +79,23 @@ public:
     
     std::vector<Edge> recommendMoves() const override;
     double scoreWhenComplete() const override;
-    double presentScore() const override;
-    bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move) const override;
+    bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const override;
     int totalCost() const override;
     int currentCost() const override;
+    void addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) override;
 
     std::string serialize() const override;
 
 private:
-    std::vector<Edge> generateRecommendedMoves();
-    std::vector<std::pair<SiteID, SiteID> > edges;
+    std::set<std::pair<SiteID, SiteID> >
+        generateRecommendedMoves(const SiteID &v0, const SiteID &mine, const Opening &o);
+    double computeScore(PID punter, SiteID mine, const Graph &player_graph, const Opening &o);
+
+    PID punter;
+    std::string mine;
+    std::set<std::pair<SiteID, SiteID> > edges;
+    int currentCostVal;
+    double scoreWhenCompleteVal;
 };
 
 class Planner {
