@@ -63,6 +63,7 @@ struct OpeningSetup {
     size_t punters;
     DumbMap map;
     Moves moves;
+    std::map<SiteID, std::vector<uint32_t> > weights;
 };
 
 struct Opening {
@@ -70,6 +71,7 @@ struct Opening {
     OpeningSetup setup;
 
     Move run();
+    void setupFinalize();
 };
 
 struct OurState {
@@ -78,6 +80,30 @@ struct OurState {
 };
 
 namespace {
+std::istream &operator >> (std::istream &instr, std::map<std::string, std::vector<uint32_t> > &weights) {
+    std::string label;
+    instr >> label;
+    while (label != "end") {
+        int size;
+        instr >> size;
+        auto &ref = weights[label];
+        ref.resize(size / sizeof(uint32_t));
+        instr.read(reinterpret_cast<char*>(&ref[0]), size);
+        instr >> label;
+    }
+    return instr;
+}
+
+std::ostream &operator << (std::ostream &oustr, const std::map<std::string, std::vector<uint32_t> > &weights) {
+    for (auto &it : weights) {
+        int size = sizeof(uint32_t) * weights.size();
+        oustr << it.first << " " << size << " ";
+        oustr.write(reinterpret_cast<const char*>(&(it.second[0])), size);
+    }
+    oustr << "end\n";
+    return oustr;
+}
+
 std::istream &operator >> (std::istream &instr, OpeningType &o) {
     std::string r;
     instr >> r;
@@ -159,6 +185,7 @@ std::istream &operator >> (std::istream &instr, OpeningSetup &os) {
     instr >> os.punters;
     instr >> os.map;
     instr >> os.moves;
+    instr >> os.weights;
     
     os.map.setPunters(os.punters);
     for (auto &it : os.moves) {
@@ -170,7 +197,7 @@ std::istream &operator >> (std::istream &instr, OpeningSetup &os) {
 }
 
 std::ostream &operator << (std::ostream &oustr, const OpeningSetup &os) {
-    return oustr << os.punter << " " << os.punters << " " << os.map << " " << os.moves;
+    return oustr << os.punter << " " << os.punters << " " << os.map << " " << os.moves << os.weights;
 }
 
 std::istream &operator >> (std::istream &instr, Opening &o) {
@@ -227,3 +254,8 @@ Move randomTurn(const Opening &s) {
     }
 }
 }
+
+void generateMineWeights
+    (std::string mine,
+     std::map<std::string, std::vector<uint32_t> > &weights,
+     const DumbMap &map);

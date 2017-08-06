@@ -14,6 +14,7 @@
 
 #include "ourgraph.h"
 #include "score_eval.h"
+#include "game.h"
  
 int main(int, char *[])
 {
@@ -55,7 +56,10 @@ int main(int, char *[])
     
   */
 
-  uint64_t score = score_player_map(0, world);
+  std::map<std::string, std::vector<uint32_t> > weights;
+  generateMineWeights("0", weights, world);
+
+  uint64_t score = score_player_map(0, weights, world);
   std::cout << "Score: " << score << std::endl;
 
   return EXIT_SUCCESS;

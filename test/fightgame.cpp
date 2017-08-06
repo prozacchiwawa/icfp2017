@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
         std::istringstream last_read("move end\n" + continue_game);
         last_read >> last;
         last_read >> os;
-        auto score = score_player_map(i, last.setup.map);
+        auto score = score_player_map(i, last.setup.weights, last.setup.map);
         std::cout << "player " << i << " score " << score << "\n";
     }
     

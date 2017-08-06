@@ -17,6 +17,7 @@ int main() {
     std::cin >> o;
     if (o.ot == SetupOp) {
         std::cin >> o.setup.moves;
+        o.setupFinalize();
     } else {
         std::cin >> o.setup.moves;
         OurState os(o);
