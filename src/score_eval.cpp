@@ -61,54 +61,64 @@ std::map<SiteID,std::set<SiteID> > player_mine_connected_paths(const DumbMap& pg
   return reach_map;
 }
 
+uint64_t score_one_mine
+(const SiteID &mine,
+ const std::set<SiteID> &player_vertices,
+ const std::map<std::string, std::vector<uint32_t> > &weights,
+ const Graph &player,
+ const DumbMap &d) {
+    uint64_t score = 0;
+    std::vector<int> distances;
+
+    auto v0_it = d.vertices_by_name.find(mine);
+    if (v0_it == d.vertices_by_name.end()) {
+        throw std::exception();
+    }
+    auto v0 = *v0_it;
+    
+    distances.assign
+        (d.vertices_by_name.size(), std::numeric_limits<int>::max());
+    auto v0_name = v0.first;
+    auto world_distances_it = weights.find(v0_name);
+    if (world_distances_it == weights.end()) {
+        throw std::exception();
+    }
+    auto &world_distances = world_distances_it->second;
+    
+    // State for Dijkstra
+    // Compute shortest paths from each mine to all othervertices, 
+    // and store the output in predecessors and distances
+    boost::dijkstra_shortest_paths
+        (player, v0.second, boost::distance_map(&distances[0]));
+    
+    for (auto &it : player_vertices) {
+        auto v1_it = d.vertices_by_name.find(it);
+        if (v1_it == d.vertices_by_name.end()) {
+            throw std::exception();
+        }
+        
+        auto &v1_name = v1_it->first;
+        auto v = v1_it->second;
+        
+        if (v1_name != v0_name &&
+            distances[v] != std::numeric_limits<int>::max()) {
+            score += world_distances[v] * world_distances[v];
+        }
+    }
+
+    return score;
+}
+
 uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<uint32_t> > &weights, const DumbMap& d) {
     uint64_t score = 0;
 
     std::set<SiteID>::iterator it;
     auto &mines = d.player_mines[punter];
     auto &player_vertices = d.player_vertices[punter];
-    auto &pg = d.played[punter];
+    auto &player_graph = d.played[punter];
 
     for (it = mines.begin(); it != mines.end(); ++it) {
-  
-        auto &g = d.world;
-        auto &player_graph = pg;
-        auto v0_it = d.vertices_by_name.find(*it);
-        if (v0_it == d.vertices_by_name.end()) {
-            throw std::exception();
-        }
-        auto v0 = *v0_it;
-      
-        std::vector<int> distances;
-        distances.assign
-            (d.vertices_by_name.size(), std::numeric_limits<int>::max());
-        auto v0_name = v0.first;
-        auto world_distances_it = weights.find(v0_name);
-        if (world_distances_it == weights.end()) {
-            throw std::exception();
-        }
-        auto &world_distances = world_distances_it->second;
-      
-        // State for Dijkstra
-        // Compute shortest paths from each mine to all othervertices, 
-        // and store the output in predecessors and distances
-        boost::dijkstra_shortest_paths
-            (pg, v0.second, boost::distance_map(&distances[0]));
-
-        for (auto &it : player_vertices) {
-            auto v1_it = d.vertices_by_name.find(it);
-            if (v1_it == d.vertices_by_name.end()) {
-                throw std::exception();
-            }
-          
-            auto &v1_name = v1_it->first;
-            auto v = v1_it->second;
-
-            if (v1_name != v0_name &&
-                distances[v] != std::numeric_limits<int>::max()) {
-                score += world_distances[v] * world_distances[v];
-            }
-        }
+        score += score_one_mine(*it, player_vertices, weights, player_graph, d);
     }
     return score;
 }
