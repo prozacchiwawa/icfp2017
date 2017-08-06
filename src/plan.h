@@ -52,6 +52,14 @@ public:
     virtual double classify(PID us, const Edge &e, const DumbMap &d) const override;
 };
 
+class ConnectednessClassifier : public Classifier {
+public:
+ ConnectednessClassifier(const std::map<SiteID, uint64_t > &b) : branches(b){ }
+    virtual double classify(PID us, const Edge &e, const DumbMap &d) const override;
+ private:
+    const std::map<SiteID, uint64_t > &branches;
+};
+
 class BuildPlan {
 public:
     virtual std::vector<Edge> recommendMoves() const = 0;

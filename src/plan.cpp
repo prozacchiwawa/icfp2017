@@ -30,6 +30,11 @@ double ConnectedToLambda::classify(PID us, const Edge &e, const DumbMap &d) cons
     return x;
 }
 
+double ConnectednessClassifier::classify(PID us, const Edge &e, const DumbMap &d) const {
+  // Note: this assumes that we are building from a to b
+  return 10.0 * branches.find(e.b)->second * branches.find(e.b)->second;
+}
+
 double NeighborhoodSizeClassifier::classify(PID us, const Edge &e, const DumbMap &d) const {
     auto edgesAwayA = d.getEdgesAway(e.a, 50);
     auto edgesAwayB = d.getEdgesAway(e.b, 50);
