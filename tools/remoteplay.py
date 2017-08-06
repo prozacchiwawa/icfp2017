@@ -55,11 +55,11 @@ elif "stop" in server_msg:
     moves = server_msg["stop"]["moves"]
     scores = server_msg["stop"]["scores"]
     dbg("SCORES: {}".format(scores))
-    p = play.player_run()
-    (player_commands, player_data) = play.player_turn(p, my_id, moves, state)
-    msg = deuglify.decode(player_commands, player_data)
-    dbg(msg)
-    gamerunner.send_msg(sys.stdout, my_id, msg)
+    #p = play.player_run()
+    #(player_commands, player_data) = play.player_turn(p, my_id, moves, state)
+    #msg = deuglify.decode(player_commands, player_data)
+    #dbg(msg)
+    #gamerunner.send_msg(sys.stdout, my_id, msg)
 elif "timeout" in server_msg:
     state = server_msg["state"]["cpp"]
     # Should we call the client in this case?
