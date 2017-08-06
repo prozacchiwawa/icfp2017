@@ -63,11 +63,13 @@ public:
     }
 };
 
-#if 0
+class Opening;
+
 class DandelionPlan : public BuildPlan {
 public:
     DandelionPlan
-        (const SiteID &v0,
+        (PID punter,
+         const SiteID &v0,
          const SiteID &mine,
          const std::vector<SiteID> &path,
          const Opening &world);
@@ -84,12 +86,13 @@ public:
     std::string serialize() const override;
 
 private:
+    std::vector<Edge> generateRecommendedMoves();
     std::vector<std::pair<SiteID, SiteID> > edges;
 };
 
 class Planner {
 public:
     void initPlans(Opening &op);
+    
     std::priority_queue<BuildPlan> plans;
 };
-#endif

@@ -34,36 +34,62 @@ double NeighborhoodSizeClassifier::classify(PID us, const Edge &e, const DumbMap
     return 10.0 * edgesAwayA.size() + edgesAwayB.size();
 }
 
-#if 0
 DandelionPlan::DandelionPlan
-(const SiteID &v0,
+(PID punter,
+ const SiteID &v0,
  const SiteID &mine,
  const std::vector<SiteID> &path,
  const Opening &world) {
+    double score;
+    int cost;
+    int at = 0;
+
+    auto &d = world.setup.map;
+    auto &mines = d.player_mines[punter];
+    auto &player_vertices = d.player_vertices[punter];
+    auto &pg = d.played[punter];
+
+#if 0
+    while (at <= path.size()) {
+        Graph player_added = pg;
+        edges = generateRecommendedMoves();
+        for (auto &e : edges) {
+            
+        }
+        score = score_one_mine(mine, 
+    }
+#endif
 }
 
 DandelionPlan::DandelionPlan
 (const std::string &serialized, const Opening &world) {
 }
 
-std::vector<Edge> DandelionPlan::recommendedMoves() const {
+std::vector<Edge> DandelionPlan::recommendMoves() const {
+    std::vector<Edge> v;
+    return v;
 }
 
 double DandelionPlan::scoreWhenComplete() const {
+    return 0.0;
 }
 
 double DandelionPlan::presentScore() const {
+    return 0.0;
 }
 
 bool DandelionPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move) const {
+    return true;
 }
 
 int DandelionPlan::totalCost() const {
+    return 0;
 }
 
 int DandelionPlan::currentCost() const {
+    return 0;
 }
 
 std::string DandelionPlan::serialize() const {
+    return "";
 }
-#endif
