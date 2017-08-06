@@ -95,6 +95,7 @@ std::istream &operator >> (std::istream &instr, OpeningType &o) {
 std::istream &operator >> (std::istream &instr, MoveType &m) {
     std::string r;
     instr >> r;
+    std::cerr << "read " << r << "\n";
     if (r == "claim") {
         m = Claim;
     } else if (r == "pass") {

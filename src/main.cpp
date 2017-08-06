@@ -18,11 +18,9 @@ int main() {
     if (o.ot == SetupOp) {
         std::cin >> o.setup.moves;
     } else {
-        std::cin >> o.setup.moves;
+        // Only make a move during the main loop, not during setup
         OurState os(o);
         std::cin >> os;
-
-        // Only make a move during the main loop, not during setup
         auto take_move = o.run();
         o.setup.moves.insert(take_move);
         std::cout << take_move << "\n";
