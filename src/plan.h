@@ -55,6 +55,7 @@ public:
     virtual bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const = 0;
     virtual int totalCost() const = 0;
     virtual int currentCost() const = 0;
+    virtual void addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) = 0;
 
     virtual std::string serialize() const = 0;
 
@@ -83,13 +84,18 @@ public:
     bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const override;
     int totalCost() const override;
     int currentCost() const override;
+    void addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) override;
 
     std::string serialize() const override;
 
 private:
     std::set<std::pair<SiteID, SiteID> >
         generateRecommendedMoves(const SiteID &v0, const SiteID &mine, const Opening &o);
+    double computeScore(PID punter, SiteID mine, const Graph &player_graph, const Opening &o);
+    
     std::set<std::pair<SiteID, SiteID> > edges;
+    int currentCostVal;
+    double currentScoreVal, scoreWhenCompleteVal;
 };
 
 class Planner {
