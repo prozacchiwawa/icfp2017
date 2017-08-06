@@ -32,7 +32,7 @@ state = None # Used to pass state into cpp from final stop message
 
 if "map" in server_msg:
     init_state = server_msg
-    dbg ("INIT STATE {}".format(init_state))
+    #dbg ("INIT STATE {}".format(init_state))
     my_id = init_state["punter"]
     dbg ("     ----- We are punter # {} -----".format(my_id))
     punters = init_state["punters"]
@@ -43,7 +43,7 @@ if "map" in server_msg:
     gamerunner.send_ready(sys.stdout, my_id, {"cpp":player_data})
 elif "move" in server_msg:
     dbg ("MOVE")
-    moves = server_msg["move"]
+    moves = server_msg["move"]["moves"]
     state = server_msg["state"]["cpp"]
     p = play.player_run()
     (player_commands, player_data) = play.player_turn(p, my_id, moves, state)
@@ -53,7 +53,7 @@ elif "move" in server_msg:
 elif "stop" in server_msg:
     dbg ("STOP")
     moves = server_msg["stop"]["moves"]
-    scores = moves["stop"]["scores"]
+    scores = server_msg["stop"]["scores"]
     dbg("SCORES: {}".format(scores))
     p = play.player_run()
     (player_commands, player_data) = play.player_turn(p, my_id, moves, state)

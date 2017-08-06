@@ -17,6 +17,21 @@ def convert_map(iam, players, json_map):
     msg += "end " # End initial moves
     return msg
 
+def convert_moves(json_moves_list):
+    msg = ""
+    msg += "moves "
+    for x in json_moves_list:
+        if "pass" in x:
+            msg += "pass {} ".format(x["pass"]["punter"])
+        elif "claim" in x:
+            msg += "claim {} {} {} ".format(x["claim"]["punter"],
+                                            x["claim"]["source"],
+                                            x["claim"]["target"])
+        else:
+            raise
+    msg += "end "
+    return msg
+
 if __name__ == '__main__':
     iam = sys.argv[1]
     players = sys.argv[2]

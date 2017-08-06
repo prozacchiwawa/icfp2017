@@ -7,6 +7,7 @@ import itertools
 import subprocess as sub
 import base64
 import io # Needed for Python 2.7 to use Python 3-style open with encoding
+import uglify
 
 '''
 TODO:
@@ -35,13 +36,16 @@ def dbg(msg):
 
 def player_setup(p, player_id, num_players, map):
     import uglify
-    dbg ("MAP: {}".format(map))
+    #dbg ("MAP: {}".format(map))
     msg = uglify.convert_map(player_id, num_players, map)
     return player_comm(p, player_id, msg)
 
 # Input state is turns from last time, plus player state from last time
-def player_turn(p, player_id, prev_player_commands, prev_player_data):
-    msg  = "move {} {}".format(' '.join(prev_player_commands), prev_player_data)
+# prev_round_moves, prev_player_data are rom the SERVER
+def player_turn(p, player_id, prev_round_moves, prev_player_data):
+    dbg("PREV_ROUND_MOVES: {}".format (prev_round_moves))
+    prev_moves_str = uglify.convert_moves(prev_round_moves)
+    msg  = "move {} {}".format(prev_moves_str, prev_player_data)
     return player_comm(p, player_id, msg)
 
 def player_comm(p, player_id, msg):
