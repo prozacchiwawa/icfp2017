@@ -16,7 +16,6 @@ int main() {
     Opening o;
     std::cin >> o;
     if (o.ot == SetupOp) {
-        std::cin >> o.setup.moves;
         o.setupFinalize();
     } else {
         // Only make a move during the main loop, not during setup
