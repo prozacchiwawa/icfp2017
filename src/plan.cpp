@@ -114,7 +114,7 @@ double DandelionPlan::scoreWhenComplete() const {
     return scoreWhenCompleteVal;
 }
 
-double DandelionPlan::presentScore() const {
+double DandelionPlan::currentScore() const {
     return currentScoreVal;
 }
 
