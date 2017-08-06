@@ -72,6 +72,8 @@ struct Opening {
 
     Move run();
     void setupFinalize();
+
+    void generateDandelionLine(SiteID mine, std::set<SiteID> &vertices);
 };
 
 struct OurState {

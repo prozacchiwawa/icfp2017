@@ -45,3 +45,32 @@ void Opening::setupFinalize() {
         generateMineWeights(v0, setup.weights, setup.map);
     }
 }
+
+void Opening::generateDandelionLine(SiteID v0, std::set<SiteID> &candidates) {
+    auto edge_count = setup.map.edge_count;
+    auto max_distance = edge_count / setup.punters;
+    auto weight_it = setup.weights.find(v0);
+    if (weight_it == setup.weights.end()) {
+        std::cerr << "Tried to read vertex " << v0 << " which doesn't exist\n";
+        throw std::exception();
+    }
+    auto &weight_ref = weight_it->second;
+
+    auto max_dist = 0;
+    std::string where_max;
+    for (int i = 0; i < 2; i++) {
+        for (auto &vit : setup.map.vertices_by_name) {
+            auto vtx = vit.second;
+            if (max_dist < weight_ref[vtx]) {
+                max_dist = weight_ref[vtx];
+                where_max = vit.first;
+            }
+            if (weight_ref[vtx] == max_distance) {
+                candidates.insert(vit.first);
+            }
+        }
+        if (candidates.size() == 0 && where_max != "") {
+            max_distance = max_dist;
+        }
+    }
+}

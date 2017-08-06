@@ -20,6 +20,7 @@ int main(int argc, char **argv) {
     std::istringstream begin_game(continue_game);
     Opening o;
     begin_game >> o;
+    o.setupFinalize();
     
     while (command != "end") {
         if (command == "edges-away") {
@@ -29,8 +30,17 @@ int main(int argc, char **argv) {
             for (auto &it : edgesAway) {
                 std::cout << it.first << "," << it.second << "\n";
             }
+        } else if (command == "at-dist") {
+            std::set<SiteID> candidates;
+            std::string vtx;
+            std::cin >> vtx;
+            o.generateDandelionLine(vtx, candidates);
+            for (auto &it : candidates) {
+                std::cout << it << "\n";
+            }
         }
         std::cout << o.setup.map;
+        std::cin >> command;
     }
     return 0;
 }
