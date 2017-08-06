@@ -74,6 +74,7 @@ struct Opening {
     void setupFinalize();
 
     void generateDandelionLine(SiteID mine, std::set<SiteID> &vertices);
+    void gradientToMine(SiteID v0, SiteID from, std::vector<SiteID> &line);
 };
 
 struct OurState {
@@ -127,7 +128,6 @@ std::istream &operator >> (std::istream &instr, OpeningType &o) {
 std::istream &operator >> (std::istream &instr, MoveType &m) {
     std::string r;
     instr >> r;
-    std::cerr << "read " << r << "\n";
     if (r == "claim") {
         m = Claim;
     } else if (r == "pass") {
@@ -234,7 +234,6 @@ std::ostream &operator << (std::ostream &oustr, const OurState &s) {
     size_t bsize = b64e_size(ostr.size());
     std::vector<char> vec(bsize+1);
     b64_encode(ostr.c_str(), ostr.size(), &vec[0]);
-    std::cerr << "b64\n" << ostr << "\n";
     return oustr << std::string(&vec[0], vec.size()-1);
 }
 

@@ -38,6 +38,14 @@ int main(int argc, char **argv) {
             for (auto &it : candidates) {
                 std::cout << it << "\n";
             }
+        } else if (command == "path-to-mine") {
+            std::vector<SiteID> line;
+            std::string mine, from;
+            std::cin >> mine >> from;
+            o.gradientToMine(mine, from, line);
+            for (auto &it : line) {
+                std::cout << it << "\n";
+            }
         }
         std::cout << o.setup.map;
         std::cin >> command;
