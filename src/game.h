@@ -207,6 +207,9 @@ std::string frombase64(const std::string &r) {
 std::istream &readEncodedSetup(std::istream &instr, Opening &s) {
     std::string r;
     instr >> r;
+    if (r.size() == 0) {
+        return instr;
+    }
     auto str = frombase64(r);
     std::istringstream iss(str);
     readSetup(iss, s);
