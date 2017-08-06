@@ -109,17 +109,21 @@ uint64_t score_one_mine
     return score;
 }
 
-uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<uint32_t> > &weights, const DumbMap& d) {
+uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<uint32_t> > &weights, const Graph &player_graph, const DumbMap& d) {
     uint64_t score = 0;
 
     std::set<SiteID>::iterator it;
     auto &mines = d.player_mines[punter];
     auto &player_vertices = d.player_vertices[punter];
-    auto &player_graph = d.played[punter];
 
     for (it = mines.begin(); it != mines.end(); ++it) {
         score += score_one_mine(*it, player_vertices, weights, player_graph, d);
     }
     return score;
+}
+ 
+uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<uint32_t> > &weights, const DumbMap& d) {
+    auto &player_graph = d.played[punter];
+    return score_player_map(punter, weights, player_graph, d);
 }
  

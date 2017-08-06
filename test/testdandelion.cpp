@@ -19,6 +19,7 @@ int main(int argc, char **argv) {
     std::istringstream begin_game(continue_game);
     Opening o;
     begin_game >> o;
+    o.setupFinalize();
     
     if (o.ot == SetupOp) {
         numMoves = o.setup.map.edge_count;

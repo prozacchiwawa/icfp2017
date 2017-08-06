@@ -83,7 +83,7 @@ DandelionPlan::DandelionPlan
 DandelionPlan::DandelionPlan
 (const std::string &serialized, const Opening &world) {
     std::string r;
-    std::istringstream iss(serialized);
+    std::istringstream iss(frombase64(serialized));
 
     iss >> mine >> currentCostVal >> scoreWhenCompleteVal;
     iss >> r;
@@ -134,7 +134,7 @@ std::string DandelionPlan::serialize() const {
         oss << it.first << " " << it.second << "\n";
     }
     oss << "end\n";
-    return oss.str();
+    return tobase64(oss.str());
 }
 
 std::set<std::pair<SiteID, SiteID> > DandelionPlan::generateRecommendedMoves(const SiteID &v0, const SiteID &mine, const Opening &o) {
@@ -155,7 +155,9 @@ std::set<std::pair<SiteID, SiteID> > DandelionPlan::generateRecommendedMoves(con
         }
         lit_val = it;
     }
-    res.insert(make_ordered_pair(lit_val, mine));
+    if (lit_val != "") {
+        res.insert(make_ordered_pair(lit_val, mine));
+    }
     for (auto ep = boost::in_edges(vtx, o.setup.map.world);
          ep.first != ep.second;
          ++ep.first) {
@@ -221,12 +223,10 @@ double DandelionPlan::computeScore(PID punter, SiteID mine, const Graph &player_
     auto &d = o.setup.map;
     auto &player_vertices = d.player_vertices[punter];
     auto &orig_graph = d.played[punter];
-    return score_one_mine
-        (mine, player_vertices, o.setup.weights, player_graph, d) -
-        score_one_mine
-        (mine, player_vertices, o.setup.weights, orig_graph, d);
+    return score_player_map(punter, o.setup.weights, player_graph, d) -
+        score_player_map(punter, o.setup.weights, orig_graph, d);
 }
 
 std::ostream &operator << (std::ostream &oustr, const DandelionPlan &dp) {
-    return oustr << tobase64(dp.serialize());
+    return oustr << dp.serialize();
 }

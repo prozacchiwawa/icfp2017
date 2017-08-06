@@ -64,8 +64,9 @@ void Opening::generateDandelionLine(SiteID v0, std::set<SiteID> &candidates) con
                 max_dist = weight_ref[vtx];
                 where_max = vit.first;
             }
-            if (weight_ref[vtx] == max_distance ||
-                setup.map.mines.find(vit.first) != setup.map.mines.end()) {
+            if (weight_ref[vtx] &&
+                (weight_ref[vtx] == max_distance ||
+                 setup.map.mines.find(vit.first) != setup.map.mines.end())) {
                 candidates.insert(vit.first);
             }
         }
