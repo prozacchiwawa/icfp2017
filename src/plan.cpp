@@ -146,7 +146,7 @@ std::set<std::pair<SiteID, SiteID> > DandelionPlan::generateRecommendedMoves(con
     }
     auto vtx = vtx_it->second;
     o.gradientToMine(mine, v0, pathHome);
-    std::string lit_val;
+    std::string lit_val = v0;
     for (auto &it : pathHome) {
         if (lit_val != "") {
             res.insert(make_ordered_pair(it, lit_val));

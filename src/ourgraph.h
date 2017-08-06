@@ -147,6 +147,22 @@ struct DumbMap {
         played_edges.insert(std::make_pair(ap->first, bp->first));
         boost::add_edge(ap->second.second, bp->second.second, 1, played[punter]);
     }
+
+    std::string vtx_name(unsigned int idx) const {
+        auto vtx_it = vertices_by_number.find(idx);
+        if (vtx_it == vertices_by_number.end()) {
+            throw std::exception();
+        }
+        return vtx_it->second;
+    }
+
+    unsigned int vtx_idx(const SiteID &name) const {
+        auto vtx_it = vertices_by_name.find(name);
+        if (vtx_it == vertices_by_name.end()) {
+            throw std::exception();
+        }
+        return vtx_it->second;
+    }
 };
 
 namespace {

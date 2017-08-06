@@ -75,6 +75,7 @@ struct Opening {
 
     void generateDandelionLine(SiteID mine, std::set<SiteID> &vertices) const;
     void gradientToMine(SiteID v0, SiteID from, std::vector<SiteID> &line) const;
+    std::string vtx_name(unsigned int idx);
 };
 
 struct OurState {
