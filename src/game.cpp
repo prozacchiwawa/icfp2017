@@ -45,7 +45,7 @@ void Opening::setupFinalize() {
     }
 }
 
-void Opening::generateDandelionLine(SiteID v0, std::set<SiteID> &candidates) {
+void Opening::generateDandelionLine(SiteID v0, std::set<SiteID> &candidates) const {
     auto edge_count = setup.map.edge_count;
     auto max_distance = edge_count / setup.punters;
     auto weight_it = setup.weights.find(v0);
@@ -75,7 +75,7 @@ void Opening::generateDandelionLine(SiteID v0, std::set<SiteID> &candidates) {
     }
 }
 
-void Opening::gradientToMine(SiteID v0, SiteID from, std::vector<SiteID> &line) {
+void Opening::gradientToMine(SiteID v0, SiteID from, std::vector<SiteID> &line) const {
     auto vtx_it = setup.map.vertices_by_name.find(from);
     if (vtx_it == setup.map.vertices_by_name.end()) {
         return;

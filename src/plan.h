@@ -69,7 +69,7 @@ class DandelionPlan : public BuildPlan {
 public:
     DandelionPlan
         (PID punter,
-         const SiteID &v0,
+         SiteID v0,
          const SiteID &mine,
          const std::vector<SiteID> &path,
          const Opening &world);
@@ -86,8 +86,9 @@ public:
     std::string serialize() const override;
 
 private:
-    std::vector<Edge> generateRecommendedMoves();
-    std::vector<std::pair<SiteID, SiteID> > edges;
+    std::set<std::pair<SiteID, SiteID> >
+        generateRecommendedMoves(const SiteID &v0, const SiteID &mine, const Opening &o);
+    std::set<std::pair<SiteID, SiteID> > edges;
 };
 
 class Planner {
