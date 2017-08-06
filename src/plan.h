@@ -3,6 +3,8 @@
 #include <queue>
 #include "game.h"
 
+class Opening;
+
 class Edge {
 public:
     std::string a;
@@ -50,7 +52,7 @@ public:
     virtual std::vector<Edge> recommendMoves() const = 0;
     virtual double scoreWhenComplete() const = 0;
     virtual double presentScore() const = 0;
-    virtual bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move) const = 0;
+    virtual bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const = 0;
     virtual int totalCost() const = 0;
     virtual int currentCost() const = 0;
 
@@ -63,7 +65,6 @@ public:
     }
 };
 
-class Opening;
 
 class DandelionPlan : public BuildPlan {
 public:
@@ -79,7 +80,7 @@ public:
     std::vector<Edge> recommendMoves() const override;
     double scoreWhenComplete() const override;
     double presentScore() const override;
-    bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move) const override;
+    bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const override;
     int totalCost() const override;
     int currentCost() const override;
 

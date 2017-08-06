@@ -1,4 +1,5 @@
 #include "plan.h"
+#include "game.h"
 #include "score_eval.h"
 
 double ZeroClassifier::classify(PID us, const Edge &e, const DumbMap &d) const {
@@ -108,8 +109,8 @@ double DandelionPlan::presentScore() const {
     return 0.0;
 }
 
-bool DandelionPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move) const {
-    
+bool DandelionPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const {
+    return punter != o.setup.punter && edges.find(move) != edges.end();
 }
 
 int DandelionPlan::totalCost() const {
