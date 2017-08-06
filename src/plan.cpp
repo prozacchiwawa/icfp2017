@@ -41,14 +41,13 @@ DandelionPlan::DandelionPlan
  SiteID v0,
  const SiteID &mine,
  const std::vector<SiteID> &path,
- const Opening &world) {
+ const Opening &world) : punter(punter), mine(mine) {
     double best_score = -1;
     double score;
     int cost;
     int at = 0;
 
     auto &d = world.setup.map;
-    auto &mines = d.player_mines[punter];
     auto &pg = d.played[punter];
 
     while (at <= path.size()) {
@@ -87,6 +86,8 @@ DandelionPlan::DandelionPlan
 (const std::string &serialized, const Opening &world) {
     std::string r;
     std::istringstream iss(serialized);
+
+    iss >> mine >> currentCostVal >> currentScoreVal >> scoreWhenCompleteVal;
     iss >> r;
     edges.clear();
     while (r != "end") {
@@ -131,6 +132,11 @@ int DandelionPlan::currentCost() const {
 
 std::string DandelionPlan::serialize() const {
     std::ostringstream oss;
+    oss
+        << mine << " "
+        << currentCostVal << " "
+        << currentScoreVal << " "
+        << scoreWhenCompleteVal << "\n";
     for (auto &it : edges) {
         oss << it.first << " " << it.second << "\n";
     }
@@ -191,18 +197,44 @@ std::set<std::pair<SiteID, SiteID> > DandelionPlan::generateRecommendedMoves(con
 }
 
 void DandelionPlan::addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) {
+    auto &d = o.setup.map;
+
     edges.erase(move);
-    currentScoreVal = 0;
+    currentCostVal = 0;
     for (auto &it : edges) {
-        if (o.setup.map.played_edges.find(it) != o.setup.map.played_edges.end()) {
-            currentScoreVal++;
+        if (d.played_edges.find(it) != d.played_edges.end()) {
+            currentCostVal++;
         }
     }
+
+    auto orig_graph = d.played[punter];
+    auto player_graph = d.played[punter];
+    auto &player_vertices = d.player_vertices[punter];
+    
+    for (auto &e : edges) {
+        auto a_it = d.vertices_by_name.find(e.first);
+        auto b_it = d.vertices_by_name.find(e.second);
+        if (a_it == d.vertices_by_name.end() ||
+            b_it == d.vertices_by_name.end()) {
+            throw std::exception();
+        }
+        auto a_v = *a_it;
+        auto b_v = *b_it;
+        boost::add_edge(a_v.second, b_v.second, 1, player_graph);
+    }
+        
+    currentScoreVal = score_one_mine
+        (mine, player_vertices, o.setup.weights, player_graph, d) -
+        score_one_mine
+        (mine, player_vertices, o.setup.weights, orig_graph, d);
 }
 
 double DandelionPlan::computeScore(PID punter, SiteID mine, const Graph &player_graph, const Opening &o) {
     auto &d = o.setup.map;
     auto &player_vertices = d.player_vertices[punter];
+    auto &orig_graph = d.played[punter];
     return score_one_mine
-        (mine, player_vertices, o.setup.weights, player_graph, d);
+        (mine, player_vertices, o.setup.weights, player_graph, d) -
+        score_one_mine
+        (mine, player_vertices, o.setup.weights, orig_graph, d);
 }

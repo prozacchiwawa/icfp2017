@@ -51,7 +51,6 @@ class BuildPlan {
 public:
     virtual std::vector<Edge> recommendMoves() const = 0;
     virtual double scoreWhenComplete() const = 0;
-    virtual double presentScore() const = 0;
     virtual bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const = 0;
     virtual int totalCost() const = 0;
     virtual int currentCost() const = 0;
@@ -80,7 +79,6 @@ public:
     
     std::vector<Edge> recommendMoves() const override;
     double scoreWhenComplete() const override;
-    double presentScore() const override;
     bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const override;
     int totalCost() const override;
     int currentCost() const override;
@@ -92,10 +90,12 @@ private:
     std::set<std::pair<SiteID, SiteID> >
         generateRecommendedMoves(const SiteID &v0, const SiteID &mine, const Opening &o);
     double computeScore(PID punter, SiteID mine, const Graph &player_graph, const Opening &o);
-    
+
+    PID punter;
+    std::string mine;
     std::set<std::pair<SiteID, SiteID> > edges;
     int currentCostVal;
-    double currentScoreVal, scoreWhenCompleteVal;
+    double scoreWhenCompleteVal;
 };
 
 class Planner {
