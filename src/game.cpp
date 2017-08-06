@@ -46,17 +46,26 @@ void Opening::setupFinalize() {
 
     for (auto &vtx_it : setup.map.vertices_by_name) {
         auto vtx = vtx_it.second;
-        Graph::out_edge_iterator ei, ei_end;
-        boost::tie (ei,ei_end) = boost::out_edges(vtx, setup.map.world);
-        std::cerr << "V: " << vtx << " edges: ";
+        Graph::in_edge_iterator ie, ie_end;
+        Graph::out_edge_iterator oe, oe_end;
+        boost::tie (oe,oe_end) = boost::out_edges(vtx, setup.map.world);
+        boost::tie (ie,ie_end) = boost::in_edges(vtx, setup.map.world);
+        std::cerr << "Vertex " << setup.map.vertices_by_number[vtx] << ": ";
         uint64_t num_edges = 0;
-        for (; ei != ei_end; ei++) {
-          std::cerr << "(" << source(*ei, setup.map.world) << "," << 
-              target (*ei, setup.map.world) << ") ";
+        for (; ie != ie_end; ie++) {
+          auto s = setup.map.vertices_by_number[source(*ie, setup.map.world)];
+          auto t = setup.map.vertices_by_number[target(*ie, setup.map.world)];
+          std::cerr << "(" << s << "," << t << ") ";
           num_edges++;
         }
+        for (; oe != oe_end; oe++) {
+          auto s = setup.map.vertices_by_number[source(*oe, setup.map.world)];
+          auto t = setup.map.vertices_by_number[target(*oe, setup.map.world)];
+          std::cerr << "(" << s << "," << t << ") ";
+          num_edges++;
+        }
+        std::cerr << "[" << num_edges << " edges]" << std::endl;
         setup.branches[vtx_it.first] = num_edges;
-        std::cerr << std::endl;
     }
 }
 
