@@ -79,8 +79,9 @@ void Opening::generateDandelionLine(SiteID v0, std::set<SiteID> &candidates) con
                 max_dist = weight_ref[vtx];
                 where_max = vit.first;
             }
-            if (weight_ref[vtx] == max_distance ||
-                setup.map.mines.find(vit.first) != setup.map.mines.end()) {
+            if (weight_ref[vtx] &&
+                (weight_ref[vtx] == max_distance ||
+                 setup.map.mines.find(vit.first) != setup.map.mines.end())) {
                 candidates.insert(vit.first);
             }
         }
@@ -91,11 +92,7 @@ void Opening::generateDandelionLine(SiteID v0, std::set<SiteID> &candidates) con
 }
 
 void Opening::gradientToMine(SiteID v0, SiteID from, std::vector<SiteID> &line) const {
-    auto vtx_it = setup.map.vertices_by_name.find(from);
-    if (vtx_it == setup.map.vertices_by_name.end()) {
-        return;
-    }
-    auto vtx = vtx_it->second;
+    auto vtx = setup.map.vtx_idx(from);
     auto weight_it = setup.weights.find(v0);
     if (weight_it == setup.weights.end()) {
         std::cerr << "Tried to read vertex " << v0 << " which doesn't exist\n";
@@ -113,10 +110,10 @@ void Opening::gradientToMine(SiteID v0, SiteID from, std::vector<SiteID> &line) 
             auto vs2 = boost::target(*ep.first, setup.map.world);
             if (weight_ref[vs1] < dist) {
                 dist = weight_ref[vs1];
-                vtx = weight_ref[vs1];
+                vtx = vs1;
             } else if (weight_ref[vs2] < dist) {
                 dist = weight_ref[vs2];
-                vtx = weight_ref[vs2];
+                vtx = vs2;
             }
         }
         for (auto ep = boost::out_edges(vtx, setup.map.world);
@@ -126,10 +123,10 @@ void Opening::gradientToMine(SiteID v0, SiteID from, std::vector<SiteID> &line) 
             auto vs2 = boost::target(*ep.first, setup.map.world);
             if (weight_ref[vs1] < dist) {
                 dist = weight_ref[vs1];
-                vtx = weight_ref[vs1];
+                vtx = vs1;
             } else if (weight_ref[vs2] < dist) {
                 dist = weight_ref[vs2];
-                vtx = weight_ref[vs2];
+                vtx = vs2;
             }
         }
         if (vtx == started_with) {

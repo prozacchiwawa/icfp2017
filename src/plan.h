@@ -100,6 +100,8 @@ private:
     double currentScoreVal;
 };
 
+std::ostream &operator << (std::ostream &oustr, const DandelionPlan &bp);
+
 class Planner {
 public:
     void initPlans(Opening &op);

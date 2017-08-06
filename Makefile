@@ -9,7 +9,7 @@ CXX=clang++-3.9
 FLAGS=# -ferror-limit=1
 LIBS=-lboost_iostreams -lboost_system -lz
 
-all: bin/main bin/graphio bin/test_score_eval bin/testgame bin/moveio bin/testmap bin/fightgame
+all: bin/main bin/graphio bin/test_score_eval bin/testgame bin/moveio bin/testmap bin/fightgame bin/testdandelion
 
 %.o:: %.c
 	gcc -g -c -o $@ $<
@@ -37,8 +37,11 @@ bin/testgame: test/testgame.cpp src/plan.o src/game.o $(HDRS)
 bin/testmap: test/testmap.cpp src/plan.o src/game.o $(HDRS)
 	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/testmap.cpp $(OBJS) $(LIBS)
 
-bin/fightgame: test/fightgame.cpp src/plan.o src/game.o src/score_eval.o $(HDRS)
+bin/fightgame: test/fightgame.cpp $(OBJS) $(HDRS)
 	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/fightgame.cpp $(OBJS) $(LIBS)
+
+bin/testdandelion: test/testdandelion.cpp $(OBJS) $(HDRS)
+	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/testdandelion.cpp $(OBJS) $(LIBS)
 
 bin:
 	mkdir -p bin

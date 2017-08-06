@@ -71,8 +71,6 @@ DandelionPlan::DandelionPlan
             edges = std::move(new_edges);
             best_score = score;
             scoreWhenCompleteVal = best_score;
-        } else if (score < best_score) {
-            break;
         }
 
         if (at < path.size()) {
@@ -85,9 +83,9 @@ DandelionPlan::DandelionPlan
 DandelionPlan::DandelionPlan
 (const std::string &serialized, const Opening &world) {
     std::string r;
-    std::istringstream iss(serialized);
+    std::istringstream iss(frombase64(serialized));
 
-    iss >> mine >> currentCostVal >> currentScoreVal >> scoreWhenCompleteVal;
+    iss >> mine >> currentCostVal >> scoreWhenCompleteVal;
     iss >> r;
     edges.clear();
     while (r != "end") {
@@ -114,10 +112,6 @@ double DandelionPlan::scoreWhenComplete() const {
     return scoreWhenCompleteVal;
 }
 
-double DandelionPlan::currentScore() const {
-    return currentScoreVal;
-}
-
 bool DandelionPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const {
     return punter != o.setup.punter && edges.find(move) != edges.end();
 }
@@ -135,13 +129,12 @@ std::string DandelionPlan::serialize() const {
     oss
         << mine << " "
         << currentCostVal << " "
-        << currentScoreVal << " "
         << scoreWhenCompleteVal << "\n";
     for (auto &it : edges) {
         oss << it.first << " " << it.second << "\n";
     }
     oss << "end\n";
-    return oss.str();
+    return tobase64(oss.str());
 }
 
 std::set<std::pair<SiteID, SiteID> > DandelionPlan::generateRecommendedMoves(const SiteID &v0, const SiteID &mine, const Opening &o) {
@@ -153,7 +146,7 @@ std::set<std::pair<SiteID, SiteID> > DandelionPlan::generateRecommendedMoves(con
     }
     auto vtx = vtx_it->second;
     o.gradientToMine(mine, v0, pathHome);
-    std::string lit_val;
+    std::string lit_val = v0;
     for (auto &it : pathHome) {
         if (lit_val != "") {
             res.insert(make_ordered_pair(it, lit_val));
@@ -162,7 +155,9 @@ std::set<std::pair<SiteID, SiteID> > DandelionPlan::generateRecommendedMoves(con
         }
         lit_val = it;
     }
-    res.insert(make_ordered_pair(lit_val, mine));
+    if (lit_val != "") {
+        res.insert(make_ordered_pair(lit_val, mine));
+    }
     for (auto ep = boost::in_edges(vtx, o.setup.map.world);
          ep.first != ep.second;
          ++ep.first) {
@@ -222,19 +217,16 @@ void DandelionPlan::addMove(PID punter, const std::pair<SiteID, SiteID> &move, c
         auto b_v = *b_it;
         boost::add_edge(a_v.second, b_v.second, 1, player_graph);
     }
-        
-    currentScoreVal = score_one_mine
-        (mine, player_vertices, o.setup.weights, player_graph, d) -
-        score_one_mine
-        (mine, player_vertices, o.setup.weights, orig_graph, d);
 }
 
 double DandelionPlan::computeScore(PID punter, SiteID mine, const Graph &player_graph, const Opening &o) {
     auto &d = o.setup.map;
     auto &player_vertices = d.player_vertices[punter];
     auto &orig_graph = d.played[punter];
-    return score_one_mine
-        (mine, player_vertices, o.setup.weights, player_graph, d) -
-        score_one_mine
-        (mine, player_vertices, o.setup.weights, orig_graph, d);
+    return score_player_map(punter, o.setup.weights, player_graph, d) -
+        score_player_map(punter, o.setup.weights, orig_graph, d);
+}
+
+std::ostream &operator << (std::ostream &oustr, const DandelionPlan &dp) {
+    return oustr << dp.serialize();
 }
