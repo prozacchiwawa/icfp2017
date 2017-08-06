@@ -216,25 +216,33 @@ std::istream &operator >> (std::istream &instr, Opening &o) {
     return instr;
 }
 
-std::istream &operator >> (std::istream &instr, OurState &s) {
-    std::string r;
-    instr >> r;
+std::string frombase64(const std::string &r) {
     size_t bsize = b64d_size(r.size());
     std::vector<char> vec(bsize+1);
     b64_decode(r.c_str(), r.size(), &vec[0]);
-    auto str = std::string(&vec[0], bsize);
+    return std::string(&vec[0], bsize);
+}
+
+std::istream &operator >> (std::istream &instr, OurState &s) {
+    std::string r;
+    instr >> r;
+    auto str = frombase64(r);
     std::istringstream iss(str);
     return iss >> s.setup >> s.setup.weights;
+}
+
+std::string tobase64(const std::string &ostr) {
+    size_t bsize = b64e_size(ostr.size());
+    std::vector<char> vec(bsize+1);
+    b64_encode(ostr.c_str(), ostr.size(), &vec[0]);
+    return std::string(&vec[0], vec.size()-1);
 }
 
 std::ostream &operator << (std::ostream &oustr, const OurState &s) {
     std::ostringstream oss;
     oss << s.setup << s.setup.weights;
     auto ostr = oss.str();
-    size_t bsize = b64e_size(ostr.size());
-    std::vector<char> vec(bsize+1);
-    b64_encode(ostr.c_str(), ostr.size(), &vec[0]);
-    return oustr << std::string(&vec[0], vec.size()-1);
+    return oustr << tobase64(ostr);
 }
 
 Move randomTurn(const Opening &s) {

@@ -71,8 +71,6 @@ DandelionPlan::DandelionPlan
             edges = std::move(new_edges);
             best_score = score;
             scoreWhenCompleteVal = best_score;
-        } else if (score < best_score) {
-            break;
         }
 
         if (at < path.size()) {
@@ -87,7 +85,7 @@ DandelionPlan::DandelionPlan
     std::string r;
     std::istringstream iss(serialized);
 
-    iss >> mine >> currentCostVal >> currentScoreVal >> scoreWhenCompleteVal;
+    iss >> mine >> currentCostVal >> scoreWhenCompleteVal;
     iss >> r;
     edges.clear();
     while (r != "end") {
@@ -114,10 +112,6 @@ double DandelionPlan::scoreWhenComplete() const {
     return scoreWhenCompleteVal;
 }
 
-double DandelionPlan::presentScore() const {
-    return currentScoreVal;
-}
-
 bool DandelionPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const {
     return punter != o.setup.punter && edges.find(move) != edges.end();
 }
@@ -135,7 +129,6 @@ std::string DandelionPlan::serialize() const {
     oss
         << mine << " "
         << currentCostVal << " "
-        << currentScoreVal << " "
         << scoreWhenCompleteVal << "\n";
     for (auto &it : edges) {
         oss << it.first << " " << it.second << "\n";
@@ -222,11 +215,6 @@ void DandelionPlan::addMove(PID punter, const std::pair<SiteID, SiteID> &move, c
         auto b_v = *b_it;
         boost::add_edge(a_v.second, b_v.second, 1, player_graph);
     }
-        
-    currentScoreVal = score_one_mine
-        (mine, player_vertices, o.setup.weights, player_graph, d) -
-        score_one_mine
-        (mine, player_vertices, o.setup.weights, orig_graph, d);
 }
 
 double DandelionPlan::computeScore(PID punter, SiteID mine, const Graph &player_graph, const Opening &o) {
@@ -237,4 +225,8 @@ double DandelionPlan::computeScore(PID punter, SiteID mine, const Graph &player_
         (mine, player_vertices, o.setup.weights, player_graph, d) -
         score_one_mine
         (mine, player_vertices, o.setup.weights, orig_graph, d);
+}
+
+std::ostream &operator << (std::ostream &oustr, const DandelionPlan &dp) {
+    return oustr << tobase64(dp.serialize());
 }
