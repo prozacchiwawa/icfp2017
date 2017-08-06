@@ -44,6 +44,10 @@ struct DumbMap {
     std::map<SiteID, Vertex> vertices_by_name;
     std::map<int, SiteID> vertices_by_number;
 
+    int edge_count;
+
+    DumbMap() : edge_count() { }
+
     template <class E>
     void with_edge(const E &ep, std::function<void(const std::string &a, const std::string &b)> f) const {
         auto vs1 = boost::source(*ep.first, world);
@@ -164,6 +168,7 @@ std::istream &operator >> (std::istream &instr, DumbMap &m) {
         if (r != "end") {
             instr >> s;
             boost::add_edge(m.vertices_by_name[r], m.vertices_by_name[s], 1, m.world);
+            m.edge_count++;
         } else {
             break;
         };
