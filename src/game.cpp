@@ -7,8 +7,17 @@ Move Opening::run() {
     auto neighborhood = NeighborhoodSizeClassifier();
     auto connected = ConnectedToLambda();
     auto classifier = PlusClassifier<NeighborhoodSizeClassifier,ConnectedToLambda>(neighborhood, connected);
-    
+
+    // Run plans
+    auto plan = setup.planner.current();
     std::vector<Edge> scores;
+    auto suggested = plan ? plan->recommendMoves() : std::vector<Edge>();
+    std::transform(suggested.begin(), suggested.end(), std::back_inserter(scores), [&] (const Edge &e) {
+        auto f = e;
+        f.score = 10000.0 + classifier.classify(setup.punter, e, setup.map);
+        return f;
+    });
+    
     std::transform(edges.begin(), edges.end(), std::back_inserter(scores), [&] (const std::pair<SiteID,SiteID> &p) {
         auto e = Edge(p.first, p.second);
         e.score = classifier.classify(setup.punter, e, setup.map);
@@ -20,6 +29,11 @@ Move Opening::run() {
     } else {
         return Move::pass(setup.punter);
     }
+}
+
+void Opening::addMove(PID punter, const std::string &a, const std::string &b) {
+    setup.map.addMove(punter, a, b);
+    setup.planner.addMove(punter, a, b, *this);
 }
 
 void generateMineWeights

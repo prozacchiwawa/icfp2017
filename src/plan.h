@@ -113,6 +113,7 @@ class Planner {
 public:
     void initPlans(Opening &op);
     std::shared_ptr<BuildPlan> current() const;
+    void addMove(PID punter, const std::string &a, const std::string &b, Opening &o);
 
     std::istream &read(std::istream &instr, const Opening &o);
     std::ostream &write(std::ostream &oustr, const Opening &o) const;

@@ -67,6 +67,7 @@ struct Opening {
 
     Move run();
     void setupFinalize();
+    void addMove(PID punter, const std::string &a, const std::string &b);
 
     void generateDandelionLine(SiteID mine, std::set<SiteID> &vertices) const;
     void gradientToMine(SiteID v0, SiteID from, std::vector<SiteID> &line) const;
