@@ -33,3 +33,37 @@ double NeighborhoodSizeClassifier::classify(PID us, const Edge &e, const DumbMap
     auto edgesAwayB = d.getEdgesAway(e.b, 50);
     return 10.0 * edgesAwayA.size() + edgesAwayB.size();
 }
+
+#if 0
+DandelionPlan::DandelionPlan
+(const SiteID &v0,
+ const SiteID &mine,
+ const std::vector<SiteID> &path,
+ const Opening &world) {
+}
+
+DandelionPlan::DandelionPlan
+(const std::string &serialized, const Opening &world) {
+}
+
+std::vector<Edge> DandelionPlan::recommendedMoves() const {
+}
+
+double DandelionPlan::scoreWhenComplete() const {
+}
+
+double DandelionPlan::presentScore() const {
+}
+
+bool DandelionPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move) const {
+}
+
+int DandelionPlan::totalCost() const {
+}
+
+int DandelionPlan::currentCost() const {
+}
+
+std::string DandelionPlan::serialize() const {
+}
+#endif
