@@ -118,7 +118,7 @@ double DandelionPlan::scoreWhenComplete() const {
 }
 
 bool DandelionPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const {
-    return punter != o.setup.punter && edges.find(move) != edges.end();
+    return (punter == o.setup.punter && edges.size() == 1 && edges.find(move) != edges.end()) || (punter != o.setup.punter && edges.find(move) != edges.end());
 }
 
 int DandelionPlan::totalCost() const {
