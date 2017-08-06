@@ -118,7 +118,7 @@ double DandelionPlan::scoreWhenComplete() const {
 }
 
 bool DandelionPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const {
-    return punter != o.setup.punter && edges.find(move) != edges.end();
+    return (punter == o.setup.punter && edges.size() == 1 && edges.find(move) != edges.end()) || (punter != o.setup.punter && edges.find(move) != edges.end());
 }
 
 int DandelionPlan::totalCost() const {
@@ -278,7 +278,7 @@ std::istream &Planner::read(std::istream &instr, const Opening &o) {
 }
 
 std::ostream &Planner::write(std::ostream &oustr, const Opening &o) const {
-    auto planner_copy = o.setup.planner.plans;
+    auto planner_copy = plans;
     while (!planner_copy.empty()) {
         auto p = planner_copy.top();
         planner_copy.pop();
@@ -286,4 +286,20 @@ std::ostream &Planner::write(std::ostream &oustr, const Opening &o) const {
     }
     oustr << "end\n";
     return oustr;
+}
+
+void Planner::addMove(PID punter, const std::string &a, const std::string &b, Opening &o) {
+    std::priority_queue<std::shared_ptr<BuildPlan> > q;
+    while (!plans.empty()) {
+        auto p = plans.top();
+        plans.pop();
+        auto pair = make_ordered_pair(a,b);
+        if (!p->moveEliminates(punter, pair, o)) {
+            q.push(p);
+        } else if (punter == o.setup.punter) {
+            p->addMove(punter, pair, o);
+            q.push(p);
+        }
+    }
+    plans = q;
 }

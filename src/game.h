@@ -67,6 +67,7 @@ struct Opening {
 
     Move run();
     void setupFinalize();
+    void addMove(PID punter, const std::string &a, const std::string &b);
 
     void generateDandelionLine(SiteID mine, std::set<SiteID> &vertices) const;
     void gradientToMine(SiteID v0, SiteID from, std::vector<SiteID> &line) const;
@@ -206,6 +207,9 @@ std::string frombase64(const std::string &r) {
 std::istream &readEncodedSetup(std::istream &instr, Opening &s) {
     std::string r;
     instr >> r;
+    if (r.size() == 0) {
+        return instr;
+    }
     auto str = frombase64(r);
     std::istringstream iss(str);
     readSetup(iss, s);
