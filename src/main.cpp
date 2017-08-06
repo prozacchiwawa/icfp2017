@@ -21,10 +21,16 @@ int main() {
         std::cin >> o.setup.moves;
         OurState os(o);
         std::cin >> os;
+
+        // Only make a move during the main loop, not during setup
+        auto take_move = o.run();
+        o.setup.moves.insert(take_move);
+        std::cout << take_move << "\n";
+
     }
-    auto take_move = o.run();
-    o.setup.moves.insert(take_move);
-    std::cout << take_move << "\n";
+
+    // Always send state
     std::cout << OurState(o) << "\n";
+
     return 0;
 }

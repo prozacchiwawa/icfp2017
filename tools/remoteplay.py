@@ -38,8 +38,8 @@ if "map" in server_msg:
     punters = init_state["punters"]
     map = init_state["map"]
     p = play.player_run()
-    (player_commands, player_data) = play.player_setup(p, my_id, punters, map)
-    #dbg("PLAYER_SETUP_STATE: {}".format(player_data))
+    player_data = play.player_setup(p, my_id, punters, map)
+    dbg("PLAYER_SETUP_STATE: {}".format(player_data))
     gamerunner.send_ready(sys.stdout, my_id, {"cpp":player_data})
 elif "move" in server_msg:
     dbg ("MOVE")

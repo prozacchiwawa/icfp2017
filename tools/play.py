@@ -38,26 +38,33 @@ def player_setup(p, player_id, num_players, map):
     import uglify
     #dbg ("MAP: {}".format(map))
     msg = uglify.convert_map(player_id, num_players, map)
-    return player_comm(p, player_id, msg)
+    # no commands (claim,pass) are sent to the server during setup
+    return player_comm(p, player_id, msg)[-1]
 
 # Input state is turns from last time, plus player state from last time
 # prev_round_moves, prev_player_data are rom the SERVER
 def player_turn(p, player_id, prev_round_moves, prev_player_data):
     dbg("PREV_ROUND_MOVES: {}".format (prev_round_moves))
     prev_moves_str = uglify.convert_moves(prev_round_moves)
-    msg  = "move {} {}".format(prev_moves_str, prev_player_data)
-    return player_comm(p, player_id, msg)
+    msg  = "{} {}".format(prev_moves_str, prev_player_data)
+    player_tokens = player_comm(p, player_id, msg)
+    player_data = player_tokens[-1]
+    player_commands = player_tokens[:-1]
+    return (player_commands, player_data)
 
 def player_comm(p, player_id, msg):
-    (stdoutdata, stderrdata) = p.communicate(msg)
-    dbg ("CPP: {}".format(stderrdata))
-    dbg ("SERVER: {}".format(msg))
-    player_tokens = stdoutdata.split()
-    player_commands = player_tokens[:-1]
-    player_data = player_tokens[-1]
-    dbg ("PLAYER COMMANDS: {}\n PLAYER DATA: {}".format(player_commands, base64.b64decode(player_data)))
-    return (player_commands, player_data)
+    dbg ("SERVER->client: {}".format(msg))
+    (stdout_data, stderr_data) = p.communicate(msg)
+    dbg ("CPP-stdout: {}".format(stdout_data))
+    dbg ("CPP-errors: {}".format(stderr_data))
+    player_tokens = stdout_data.split()
     p.wait()
+    return player_tokens
+    #player_commands = player_tokens[:-1]
+
+    #dbg ("PLAYER COMMANDS: {}\n PLAYER DATA: {}".format(player_commands, base64.b64decode(player_data)))
+    #return (player_commands, player_data)
+
 
 
 if __name__ == '__main__':

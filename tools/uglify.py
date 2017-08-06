@@ -19,7 +19,7 @@ def convert_map(iam, players, json_map):
 
 def convert_moves(json_moves_list):
     msg = ""
-    msg += "moves "
+    msg += "move "
     for x in json_moves_list:
         if "pass" in x:
             msg += "pass {} ".format(x["pass"]["punter"])
