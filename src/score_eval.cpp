@@ -86,7 +86,7 @@ uint64_t score_one_mine
     auto &world_distances = world_distances_it->second;
     
     // State for Dijkstra
-    // Compute shortest paths from each mine to all othervertices, 
+    // Compute shortest paths from each mine to all other vertices,
     // and store the output in predecessors and distances
     boost::dijkstra_shortest_paths
         (player, v0.second, boost::distance_map(&distances[0]));

@@ -58,6 +58,7 @@ struct OpeningSetup {
     Moves moves;
     Planner planner;
     std::map<SiteID, std::vector<uint32_t> > weights;
+    std::map<SiteID, uint64_t > branches; // number of incident edges
 };
 
 struct Opening {
