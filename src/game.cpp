@@ -43,6 +43,7 @@ Move Opening::run() {
 }
 
 void Opening::addMove(PID punter, const std::string &a, const std::string &b) {
+    setup.moves.insert(Move::claim(punter, a, b));
     setup.map.addMove(punter, a, b);
     setup.planner.addMove(punter, a, b, *this);
 }

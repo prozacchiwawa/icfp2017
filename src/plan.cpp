@@ -302,7 +302,11 @@ double TestPlan::scoreWhenComplete() const {
 }
 
 bool TestPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const {
-    return false;
+    if (punter == this->punter) {
+        return edges.size() == 1 && edges.find(move) != edges.end();
+    } else {
+        return edges.find(move) != edges.end();
+    }
 }
 
 int TestPlan::totalCost() const {
@@ -329,6 +333,7 @@ std::string TestPlan::serialize() const {
 }
 
 void Planner::initPlans(Opening &o) {
+#if 0
     std::map<SiteID, std::set<SiteID> > whereToBuild;
     for (auto &mine_it : o.setup.map.mines) {
         auto &build_ref = whereToBuild[mine_it];
@@ -341,7 +346,8 @@ void Planner::initPlans(Opening &o) {
             plans.push(dp);
         }
     }
-
+#endif
+    
     auto plan = std::make_shared<TestPlan>(o.setup.punter);
     plans.push(plan);
     
@@ -402,10 +408,12 @@ void Planner::addMove(PID punter, const std::string &a, const std::string &b, Op
         auto p = plans.top();
         plans.pop();
         auto pair = make_ordered_pair(a,b);
-        if (!p->moveEliminates(punter, pair, o)) {
-            q.push(p);
-        } else if (punter == o.setup.punter) {
+        auto eliminated = p->moveEliminates(punter, pair, o);
+        std::cerr << "move " << a << "," << b << " eliminates? " << eliminated << " from " << p->name() << "\n";
+        if (punter == o.setup.punter) {
             p->addMove(punter, pair, o);
+        }
+        if (!eliminated) {
             q.push(p);
         }
     }
