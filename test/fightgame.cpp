@@ -50,7 +50,9 @@ int main(int argc, char **argv) {
             o.setup.punter = whichPlayer;
             
             auto take_move = o.run();
-            o.setup.moves.insert(take_move);
+            if (take_move.moveType == Claim) {
+                o.addMove(take_move.punter, take_move.claimMove.source, take_move.claimMove.target);
+            }
             moves_since_last[whichPlayer] = take_move;
 
             std::ostringstream restart_oss;

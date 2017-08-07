@@ -21,7 +21,9 @@ int main() {
         // Only make a move during the main loop, not during setup
         readEncodedSetup(std::cin, o);
         auto take_move = o.run();
-        o.setup.moves.insert(take_move);
+        if (take_move.moveType == Claim) {
+            o.addMove(take_move.punter, take_move.claimMove.source, take_move.claimMove.target);
+        }
         std::cout << take_move << "\n";
 
     }
