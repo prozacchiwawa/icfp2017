@@ -351,6 +351,11 @@ void Planner::initPlans(Opening &o) {
 #endif
 
     std::sort(plans.begin(), plans.end(), GreaterScore());
+
+    std::cerr << "plans-for " << o.setup.punter << "\n";
+    for (auto i = 0; i < plans.size(); i++) {
+        std::cerr << frombase64(plans[i]->serialize()) << "\n";
+    }
 }
 
 std::shared_ptr<BuildPlan> Planner::current() const {
