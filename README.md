@@ -1,4 +1,10 @@
 
+# Team Name
+The team's name is the Aged Aged Man, but the team's name is called Haddock's Eyes
+
+# Team Members
+Art Yerkes art.yerkes <at> gmail.com
+Adam Kelly adam.q.kelly <at> gmail.com
 
 # To run an online mode game:
 ```

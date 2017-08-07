@@ -18,6 +18,22 @@ TODO:
 
 '''
 
+import threading
+import time
+import signal
+
+class SigintTimer(threading.Thread):
+    def __init__(self, process, timeout):
+        super(SigintTimer, self).__init__(None, None, None, None)
+        self.process = process
+        self.timeout = timeout
+
+    def run(self):
+        time.sleep(self.timeout)
+        dbg("Sending signal after {}". format(self.timeout))
+        self.process.send_signal(signal.SIGUSR1)
+        # TODO: only send if process is alive
+
 def read_json_file(filename):
     with io.open(filename, 'r', encoding="utf-8") as json_file:
         return json.load(json_file)
@@ -39,7 +55,7 @@ def player_setup(p, player_id, num_players, map):
     #dbg ("MAP: {}".format(map))
     msg = uglify.convert_map(player_id, num_players, map)
     # no commands (claim,pass) are sent to the server during setup
-    return player_comm(p, player_id, msg)[-1]
+    return player_comm(p, player_id, msg, 9)[-1]
 
 # Input state is turns from last time, plus player state from last time
 # prev_round_moves, prev_player_data are rom the SERVER
@@ -47,14 +63,23 @@ def player_turn(p, player_id, prev_round_moves, prev_player_data):
     dbg("PREV_ROUND_MOVES: {}".format (prev_round_moves))
     prev_moves_str = uglify.convert_moves(prev_round_moves)
     msg  = "{} {}".format(prev_moves_str, prev_player_data)
-    player_tokens = player_comm(p, player_id, msg)
+    player_tokens = player_comm(p, player_id, msg, 0.9)
     player_data = player_tokens[-1]
     player_commands = player_tokens[:-1]
     return (player_commands, player_data)
 
-def player_comm(p, player_id, msg):
-    dbg ("SERVER->client: {}".format(msg))
+def timed_communicate(p, msg, timeout):
+    alarm = SigintTimer(p, timeout)
+    alarm.start()
     (stdout_data, stderr_data) = p.communicate(msg)
+    return (stdout_data, stderr_data)
+    
+def player_comm(p, player_id, msg, timeout):
+    dbg ("SERVER->client: {}".format(msg))
+    
+    #(stdout_data, stderr_data) = p.communicate(msg)
+    (stdout_data, stderr_data) = timed_communicate(p, msg, timeout)
+
     dbg ("CPP-stdout: {}".format(stdout_data))
     dbg ("CPP-errors: {}".format(stderr_data))
     player_tokens = stdout_data.split()
