@@ -217,7 +217,7 @@ void DandelionPlan::addMove(PID punter, const std::pair<SiteID, SiteID> &move, c
     // If an edge has not been played yet (by anyone), 
     // add it to the potential total cost for his plan
     for (auto &it : edges) {
-      std::cerr << "checking edge (" << it.first << "," << it.second << " for applicability" <<std::endl;
+        //std::cerr << "checking edge (" << it.first << "," << it.second << " for applicability" <<std::endl;
         if (d.played_edges.find(it) != d.played_edges.end()) {
             currentCostVal++;
         }
