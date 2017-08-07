@@ -67,8 +67,6 @@ int main() {
 
     }
 
-    sleep(100);
-
     // Always send state
     writeEncodedSetup(std::cout, o);
     std::cout << "\n";
