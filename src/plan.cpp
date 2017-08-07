@@ -57,12 +57,6 @@ DandelionPlan::DandelionPlan
     // What if we run out of edges?
     while (at <= path.size()) {
         auto player_graph = pg;
-        auto world_vertices = boost::num_vertices(d.world);
-        std::cerr << "world.num_vertices " << world_vertices << "\n";
-        auto orig_vertices = boost::num_vertices(pg);
-        std::cerr << "o.num_vertices " << orig_vertices << "\n";
-        auto player_graph_vertices = boost::num_vertices(player_graph);
-        std::cerr << "pg.num_vertices " << player_graph_vertices << "\n";
         auto new_edges = generateRecommendedMoves(v0, mine, world);
         for (auto &e : new_edges) {
             auto a_it = d.vertices_by_name.find(e.first);
