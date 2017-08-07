@@ -49,12 +49,12 @@ DandelionPlan::DandelionPlan
  const Opening &world) : punter(punter), mine(mine) {
     double best_score = -1;
     double score;
-    int cost;
     int at = 0;
 
     auto &d = world.setup.map;
     auto &pg = d.played[punter];
 
+    // What if we run out of edges?
     while (at <= path.size()) {
         auto player_graph = pg;
         auto new_edges = generateRecommendedMoves(v0, mine, world);
@@ -84,6 +84,8 @@ DandelionPlan::DandelionPlan
             v0 = path[at];
         }
         at++;
+
+        currentCostVal++; // 
     }
 }
 
@@ -124,7 +126,7 @@ bool DandelionPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &
 }
 
 int DandelionPlan::totalCost() const {
-    return edges.size();
+  return edges.size(); // see cost_max
 }
 
 int DandelionPlan::currentCost() const {
@@ -202,8 +204,12 @@ void DandelionPlan::addMove(PID punter, const std::pair<SiteID, SiteID> &move, c
     auto &d = o.setup.map;
 
     edges.erase(move);
-    currentCostVal = 0;
+    currentCostVal = 0; // recalculate cost for this plan
+
+    // If an edge has not been played yet (by anyone), 
+    // add it to the potential total cost for his plan
     for (auto &it : edges) {
+      std::cerr << "checking edge (" << it.first << "," << it.second << " for applicability" <<std::endl;
         if (d.played_edges.find(it) != d.played_edges.end()) {
             currentCostVal++;
         }
@@ -265,7 +271,12 @@ void TestPlan::construct() {
         }
     }
 
+    std::cerr << "test plan cost is " << cost_max << std::endl;
+    std::cerr << "edges.size() is " << edges.size() << std::endl;
     cost_max = edges.size();
+    std::cerr << "Setting test plan cost to " << cost_max << std::endl;
+
+    std::cerr << "TestPlan::construct() my address is " << (void*) this << std::endl;
 }
 
 TestPlan::TestPlan(PID punter) : punter(punter) {
@@ -297,10 +308,15 @@ bool TestPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move,
 }
 
 int TestPlan::totalCost() const {
+  std::cerr << "test plan total cost is " << cost_max << std::endl;
     return cost_max;
 }
 
 int TestPlan::currentCost() const {
+  std::cerr << "TestPlan::currentCost my address is " << (void*) this << std::endl;
+  std::cerr << "test cost_max is " << cost_max << std::endl;
+  std::cerr << "test plan edges.size() is " << edges.size() << std::endl;
+  std::cerr << "test plan current cost is " << cost_max - edges.size() << std::endl;
     return cost_max - edges.size();
 }
 
@@ -333,7 +349,7 @@ void Planner::initPlans(Opening &o) {
     while (!queue_copy.empty()) {
         auto e = queue_copy.top();
         queue_copy.pop();
-        std::cerr << "plan " << e->currentCost() << " " << e->scoreWhenComplete() << " " << e->name() << " " << e->serialize() << "\n";
+        std::cerr << "plan cost:" << e->currentCost() << " goalScore:" << e->scoreWhenComplete() << " " << e->name() << " " << e->serialize() << "\n";
     }
 }
 
