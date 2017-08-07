@@ -66,17 +66,10 @@ public:
     virtual double scoreWhenComplete() const = 0;
     virtual bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const = 0;
     virtual int totalCost() const = 0;
-    virtual int currentCost() const = 0;
     virtual void addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) = 0;
 
     virtual std::string name() const = 0;
     virtual std::string serialize() const = 0;
-
-    bool operator < (const BuildPlan &other) const {
-        auto cost_ratio = scoreWhenComplete();
-        auto other_cost_ratio = other.scoreWhenComplete();
-        return cost_ratio > other_cost_ratio;
-    }
 };
 
 class DandelionPlan : public BuildPlan {
@@ -92,10 +85,8 @@ public:
     
     std::vector<Edge> recommendMoves() const override;
     double scoreWhenComplete() const override;
-    double currentScore() const;
     bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const override;
     int totalCost() const override;
-    int currentCost() const override;
     void addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) override;
 
     std::string name() const override { return "dandelion"; }
@@ -111,7 +102,6 @@ private:
     std::set<std::pair<SiteID, SiteID> > edges;
     int currentCostVal;
     double scoreWhenCompleteVal;
-    double currentScoreVal;
 };
 
 std::ostream &operator << (std::ostream &oustr, const DandelionPlan &bp);
@@ -123,10 +113,8 @@ public:
     
     std::vector<Edge> recommendMoves() const override;
     double scoreWhenComplete() const override;
-    double currentScore() const;
     bool moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const override;
     int totalCost() const override;
-    int currentCost() const override;
     void addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) override;
 
     std::string name() const override { return "test"; }
@@ -143,14 +131,23 @@ private:
     std::set<std::pair<SiteID, SiteID> > edges;
 };
 
+struct GreaterScore {
+    bool operator() (const std::shared_ptr<BuildPlan> &a, const std::shared_ptr<BuildPlan> &b) const {
+        return a->scoreWhenComplete() > b->scoreWhenComplete();
+    }
+};
+
 class Planner {
 public:
+    using PQ = 
+        std::priority_queue<std::shared_ptr<BuildPlan>, std::vector<std::shared_ptr<BuildPlan> >, GreaterScore >;
+    
     void initPlans(Opening &op);
     std::shared_ptr<BuildPlan> current() const;
     void addMove(PID punter, const std::string &a, const std::string &b, Opening &o);
 
     std::istream &read(std::istream &instr, const Opening &o);
     std::ostream &write(std::ostream &oustr, const Opening &o) const;
-    
-    std::priority_queue<std::shared_ptr<BuildPlan> > plans;
+
+    PQ plans;
 };

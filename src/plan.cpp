@@ -129,9 +129,11 @@ int DandelionPlan::totalCost() const {
   return edges.size(); // see cost_max
 }
 
+#if 0
 int DandelionPlan::currentCost() const {
     return currentCostVal;
 }
+#endif
 
 std::string DandelionPlan::serialize() const {
     std::ostringstream oss;
@@ -296,11 +298,7 @@ std::vector<Edge> TestPlan::recommendMoves() const {
 }
 
 double TestPlan::scoreWhenComplete() const {
-    return 0.0;
-}
-
-double TestPlan::currentScore() const {
-    return 0.00001;
+    return 9999999.0;
 }
 
 bool TestPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const {
@@ -308,17 +306,19 @@ bool TestPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move,
 }
 
 int TestPlan::totalCost() const {
-  std::cerr << "test plan total cost is " << cost_max << std::endl;
+    //std::cerr << "test plan total cost is " << cost_max << std::endl;
     return cost_max;
 }
 
+#if 0
 int TestPlan::currentCost() const {
-  std::cerr << "TestPlan::currentCost my address is " << (void*) this << std::endl;
-  std::cerr << "test cost_max is " << cost_max << std::endl;
-  std::cerr << "test plan edges.size() is " << edges.size() << std::endl;
-  std::cerr << "test plan current cost is " << cost_max - edges.size() << std::endl;
+    //std::cerr << "TestPlan::currentCost my address is " << (void*) this << std::endl;
+    //std::cerr << "test cost_max is " << cost_max << std::endl;
+    //std::cerr << "test plan edges.size() is " << edges.size() << std::endl;
+    //std::cerr << "test plan current cost is " << cost_max - edges.size() << std::endl;
     return cost_max - edges.size();
 }
+#endif
 
 void TestPlan::addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) {
     edges.erase(move);
@@ -349,7 +349,7 @@ void Planner::initPlans(Opening &o) {
     while (!queue_copy.empty()) {
         auto e = queue_copy.top();
         queue_copy.pop();
-        std::cerr << "plan cost:" << e->currentCost() << " goalScore:" << e->scoreWhenComplete() << " " << e->name() << " " << e->serialize() << "\n";
+        std::cerr << "plan cost:" << " goalScore:" << e->scoreWhenComplete() << " " << e->name() << " " << e->serialize() << "\n";
     }
 }
 
@@ -364,7 +364,7 @@ std::shared_ptr<BuildPlan> Planner::current() const {
 std::istream &Planner::read(std::istream &instr, const Opening &o) {
     std::string ty;
     instr >> ty;
-    plans = std::priority_queue<std::shared_ptr<BuildPlan> >();
+    plans = Planner::PQ();
     while (ty != "end") {
         if (ty == "dandelion") {
             instr >> ty;
@@ -397,7 +397,7 @@ std::ostream &Planner::write(std::ostream &oustr, const Opening &o) const {
 }
 
 void Planner::addMove(PID punter, const std::string &a, const std::string &b, Opening &o) {
-    std::priority_queue<std::shared_ptr<BuildPlan> > q;
+    Planner::PQ q;
     while (!plans.empty()) {
         auto p = plans.top();
         plans.pop();
