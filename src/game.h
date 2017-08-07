@@ -65,7 +65,7 @@ struct Opening {
     OpeningType ot;
     OpeningSetup setup;
 
-    Move run();
+    Move run(bool panic = false);
     void setupFinalize();
     void addMove(PID punter, const std::string &a, const std::string &b);
 

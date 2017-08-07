@@ -2,38 +2,41 @@
 #include "plan.h"
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 
-Move Opening::run() {
+Move Opening::run(bool panic) {
     auto edges = setup.map.getUnclaimedEdges();
     auto neighborhood = NeighborhoodSizeClassifier();
     auto connected = ConnectedToLambda();
     auto classifier = PlusClassifier<NeighborhoodSizeClassifier,ConnectedToLambda>(neighborhood, connected);
-
-    // Run plans
-    auto plan = setup.planner.current();
     std::vector<Edge> scores;
-    if (plan) {
-        std::cerr << "have-plan " << plan->scoreWhenComplete() << " " << plan->name() << " " << plan->serialize() << "\n";
+
+    if (!panic) {
+        // Run plans
+        auto plan = setup.planner.current();
+        if (plan) {
+            std::cerr << "have-plan " << plan->scoreWhenComplete() << " " << plan->name() << " " << plan->serialize() << "\n";
+            
+        }
+        auto queue_copy = setup.planner.plans;
+        while (!queue_copy.empty()) {
+            auto e = queue_copy.top();
+            queue_copy.pop();
+            std::cerr << "plan " << e->scoreWhenComplete() << " " << e->name() << " " << e->serialize() << "\n";
+        }
         
+        auto suggested = plan ? plan->recommendMoves() : std::vector<Edge>();
+        std::transform(suggested.begin(), suggested.end(), std::back_inserter(scores), [&] (const Edge &e) {
+                auto f = e;
+                f.score = 10000.0 + classifier.classify(setup.punter, e, setup.map);
+                return f;
+            });
     }
-    auto queue_copy = setup.planner.plans;
-    while (!queue_copy.empty()) {
-        auto e = queue_copy.top();
-        queue_copy.pop();
-        std::cerr << "plan " << e->scoreWhenComplete() << " " << e->name() << " " << e->serialize() << "\n";
-    }
-    
-    auto suggested = plan ? plan->recommendMoves() : std::vector<Edge>();
-    std::transform(suggested.begin(), suggested.end(), std::back_inserter(scores), [&] (const Edge &e) {
-        auto f = e;
-        f.score = 10000.0 + classifier.classify(setup.punter, e, setup.map);
-        return f;
-    });
     
     std::transform(edges.begin(), edges.end(), std::back_inserter(scores), [&] (const std::pair<SiteID,SiteID> &p) {
         auto e = Edge(p.first, p.second);
         e.score = classifier.classify(setup.punter, e, setup.map);
         return e;
     });
+    
     std::sort(scores.begin(), scores.end(), Edge::score_greater);
     if (scores.size() > 0) {
         return Move::claim(setup.punter, scores[0].a, scores[0].b);
