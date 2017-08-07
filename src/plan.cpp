@@ -46,7 +46,8 @@ DandelionPlan::DandelionPlan
  SiteID v0,
  const SiteID &mine,
  const std::vector<SiteID> &path,
- const Opening &world) : punter(punter), mine(mine) {
+ const Opening &world) :
+    punter(punter), mine(mine), currentCostVal(), scoreWhenCompleteVal() {
     double best_score = -1;
     double score;
     int at = 0;
@@ -90,7 +91,9 @@ DandelionPlan::DandelionPlan
 }
 
 DandelionPlan::DandelionPlan
-(const std::string &serialized, const Opening &world) {
+(const std::string &serialized, const Opening &world) :
+    currentCostVal(), scoreWhenCompleteVal()
+{
     std::string r;
     std::istringstream iss(frombase64(serialized));
 
