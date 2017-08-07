@@ -65,7 +65,7 @@ struct Opening {
     OpeningType ot;
     OpeningSetup setup;
 
-    Move run();
+    Move run(bool panic = false);
     void setupFinalize();
     void addMove(PID punter, const std::string &a, const std::string &b);
 
@@ -207,6 +207,8 @@ std::string frombase64(const std::string &r) {
 std::istream &readEncodedSetup(std::istream &instr, Opening &s) {
     std::string r;
     instr >> r;
+    auto newMoves = std::move(s.setup.moves);
+    s.setup.moves.clear();
     if (r.size() == 0) {
         return instr;
     }
@@ -215,6 +217,11 @@ std::istream &readEncodedSetup(std::istream &instr, Opening &s) {
     readSetup(iss, s);
     iss >> s.setup.weights;
     s.setup.planner.read(iss, s);
+    for (auto &it : newMoves) {
+        if (it.moveType == Claim) {
+            s.addMove(it.punter, it.claimMove.source, it.claimMove.target);
+        }
+    }
     return instr;
 }
 

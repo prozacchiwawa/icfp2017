@@ -90,30 +90,14 @@ uint64_t score_one_mine
     // and store the output in predecessors and distances
     boost::dijkstra_shortest_paths
         (player, v0.second, boost::distance_map(&distances[0]));
-    
-    for (auto &it : player_vertices) {
-        auto v1_it = d.vertices_by_name.find(it);
-        if (v1_it == d.vertices_by_name.end()) {
-            throw std::exception();
-        }
-        
-        auto &v1_name = v1_it->first;
-        auto v = v1_it->second;
-        
-        if (v1_name != v0_name &&
-            distances[v] != std::numeric_limits<int>::max()) {
-            score += world_distances[v] * world_distances[v];
-        }
-    }
 
     return score;
 }
 
-uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<uint32_t> > &weights, const Graph &player_graph, const DumbMap& d) {
+uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<uint32_t> > &weights, const std::set<SiteID> &mines, const Graph &player_graph, const DumbMap& d) {
     uint64_t score = 0;
 
     std::set<SiteID>::iterator it;
-    auto &mines = d.player_mines[punter];
     auto &player_vertices = d.player_vertices[punter];
 
     for (it = mines.begin(); it != mines.end(); ++it) {
@@ -124,6 +108,7 @@ uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<ui
  
 uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<uint32_t> > &weights, const DumbMap& d) {
     auto &player_graph = d.played[punter];
-    return score_player_map(punter, weights, player_graph, d);
+    auto &mines = d.player_mines[punter];
+    return score_player_map(punter, weights, mines, player_graph, d);
 }
  

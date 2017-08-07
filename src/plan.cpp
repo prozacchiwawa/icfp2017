@@ -49,12 +49,12 @@ DandelionPlan::DandelionPlan
  const Opening &world) : punter(punter), mine(mine) {
     double best_score = -1;
     double score;
-    int cost;
     int at = 0;
 
     auto &d = world.setup.map;
     auto &pg = d.played[punter];
 
+    // What if we run out of edges?
     while (at <= path.size()) {
         auto player_graph = pg;
         auto new_edges = generateRecommendedMoves(v0, mine, world);
@@ -67,7 +67,9 @@ DandelionPlan::DandelionPlan
             }
             auto a_v = *a_it;
             auto b_v = *b_it;
-            boost::add_edge(a_v.second, b_v.second, player_graph);
+            if (a_v.second != b_v.second) {
+                boost::add_edge(a_v.second, b_v.second, player_graph);
+            }
         }
         
         score = computeScore(punter, mine, player_graph, world);
@@ -82,6 +84,8 @@ DandelionPlan::DandelionPlan
             v0 = path[at];
         }
         at++;
+
+        currentCostVal++; // 
     }
 }
 
@@ -122,12 +126,14 @@ bool DandelionPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &
 }
 
 int DandelionPlan::totalCost() const {
-    return edges.size();
+  return edges.size(); // see cost_max
 }
 
+#if 0
 int DandelionPlan::currentCost() const {
     return currentCostVal;
 }
+#endif
 
 std::string DandelionPlan::serialize() const {
     std::ostringstream oss;
@@ -200,8 +206,12 @@ void DandelionPlan::addMove(PID punter, const std::pair<SiteID, SiteID> &move, c
     auto &d = o.setup.map;
 
     edges.erase(move);
-    currentCostVal = 0;
+    currentCostVal = 0; // recalculate cost for this plan
+
+    // If an edge has not been played yet (by anyone), 
+    // add it to the potential total cost for his plan
     for (auto &it : edges) {
+        //std::cerr << "checking edge (" << it.first << "," << it.second << " for applicability" <<std::endl;
         if (d.played_edges.find(it) != d.played_edges.end()) {
             currentCostVal++;
         }
@@ -228,12 +238,94 @@ double DandelionPlan::computeScore(PID punter, SiteID mine, const Graph &player_
     auto &d = o.setup.map;
     auto &player_vertices = d.player_vertices[punter];
     auto &orig_graph = d.played[punter];
-    return score_player_map(punter, o.setup.weights, player_graph, d) -
-        score_player_map(punter, o.setup.weights, orig_graph, d);
+    auto figure_score = 
+        score_player_map(punter, o.setup.weights, o.setup.map.mines, player_graph, d);
+    auto player_score =
+        score_player_map(punter, o.setup.weights, d);
+    return figure_score - player_score;
 }
 
 std::ostream &operator << (std::ostream &oustr, const DandelionPlan &dp) {
     return oustr << dp.serialize();
+}
+
+void TestPlan::construct() {
+    int moves_array[][2] = {
+        { 1, 3 },
+        { 3, 5 },
+        { 5, 7 },
+        { 7, 9 },
+        { 9, 11 },
+        { 11, 13 },
+        { 13, 15 },
+        { 15, 17 },
+        { 17, 19 },
+        { 19, 21 },
+        { 21, 23 },
+        { 23, 25 },
+        { 25, 1 },
+        { -1, -1 }
+    };
+
+    for (int i = 0; moves_array[i][0] != -1; i++) {
+        {
+            std::ostringstream a, b;
+            a << moves_array[i][0];
+            b << moves_array[i][1];
+            edges.insert(make_ordered_pair(a.str(), b.str()));
+        }
+    }
+}
+
+TestPlan::TestPlan(PID punter) : punter(punter) {
+    construct();
+}
+
+TestPlan::TestPlan(const std::string &serialized, const Opening &world) {
+    construct();
+}
+
+std::vector<Edge> TestPlan::recommendMoves() const {
+    std::vector<Edge> oute;
+    std::transform(edges.begin(), edges.end(), std::back_inserter(oute), [&] (const std::pair<SiteID, SiteID> &p) {
+        return Edge(p.first, p.second);
+    });
+    return oute;
+}
+
+double TestPlan::scoreWhenComplete() const {
+    return 9999999.0;
+}
+
+bool TestPlan::moveEliminates(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) const {
+    if (punter == this->punter) {
+        return edges.size() == 1 && edges.find(move) != edges.end();
+    } else {
+        return edges.find(move) != edges.end();
+    }
+}
+
+int TestPlan::totalCost() const {
+    //std::cerr << "test plan total cost is " << cost_max << std::endl;
+    return cost_max;
+}
+
+#if 0
+int TestPlan::currentCost() const {
+    //std::cerr << "TestPlan::currentCost my address is " << (void*) this << std::endl;
+    //std::cerr << "test cost_max is " << cost_max << std::endl;
+    //std::cerr << "test plan edges.size() is " << edges.size() << std::endl;
+    //std::cerr << "test plan current cost is " << cost_max - edges.size() << std::endl;
+    return cost_max - edges.size();
+}
+#endif
+
+void TestPlan::addMove(PID punter, const std::pair<SiteID, SiteID> &move, const Opening &o) {
+    edges.erase(move);
+}
+
+std::string TestPlan::serialize() const {
+    return "a";
 }
 
 void Planner::initPlans(Opening &o) {
@@ -244,9 +336,21 @@ void Planner::initPlans(Opening &o) {
         for (auto &d_at : build_ref) {
             std::vector<SiteID> dplan;
             o.gradientToMine(mine_it, d_at, dplan);
-            auto dp = std::make_shared<DandelionPlan>(0, d_at, mine_it, dplan, o);
+            auto dp = std::make_shared<DandelionPlan>
+                (o.setup.punter, d_at, mine_it, dplan, o);
             plans.push(dp);
         }
+    }
+
+#if 0
+    auto plan = std::make_shared<TestPlan>(o.setup.punter);
+    plans.push(plan);
+#endif
+    
+    auto queue_copy = o.setup.planner.plans;
+    while (!queue_copy.empty()) {
+        auto e = queue_copy.top();
+        queue_copy.pop();
     }
 }
 
@@ -261,10 +365,15 @@ std::shared_ptr<BuildPlan> Planner::current() const {
 std::istream &Planner::read(std::istream &instr, const Opening &o) {
     std::string ty;
     instr >> ty;
+    plans = Planner::PQ();
     while (ty != "end") {
         if (ty == "dandelion") {
             instr >> ty;
             auto dp = std::make_shared<DandelionPlan>(ty, o);
+            plans.push(dp);
+        } else if (ty == "test") {
+            instr >> ty;
+            auto dp = std::make_shared<TestPlan>(ty, o);
             plans.push(dp);
         } else {
             std::string enc;
@@ -289,15 +398,16 @@ std::ostream &Planner::write(std::ostream &oustr, const Opening &o) const {
 }
 
 void Planner::addMove(PID punter, const std::string &a, const std::string &b, Opening &o) {
-    std::priority_queue<std::shared_ptr<BuildPlan> > q;
+    Planner::PQ q;
     while (!plans.empty()) {
         auto p = plans.top();
         plans.pop();
         auto pair = make_ordered_pair(a,b);
-        if (!p->moveEliminates(punter, pair, o)) {
-            q.push(p);
-        } else if (punter == o.setup.punter) {
+        auto eliminated = p->moveEliminates(punter, pair, o);
+        if (punter == o.setup.punter) {
             p->addMove(punter, pair, o);
+        }
+        if (!eliminated) {
             q.push(p);
         }
     }

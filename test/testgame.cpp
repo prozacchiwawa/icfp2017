@@ -23,13 +23,14 @@ int main(int argc, char **argv) {
                 auto edges = o.setup.map.getEdges();
                 numEdges = edges.size();
                 begin_game >> o.setup.moves;
+                o.setupFinalize();
             } else {
                 readEncodedSetup(begin_game, o);
             }
             auto take_move = o.run();
             std::ostringstream game_oss;
             std::ostringstream restart_oss;
-            o.setup.moves.insert(take_move);
+            o.addMove(take_move.punter, take_move.claimMove.source, take_move.claimMove.target);
             restart_oss
                 << "move " << o.setup.moves << " ";
             writeEncodedSetup(restart_oss, o);
