@@ -1,0 +1,3 @@
+
+view `ls -pltr |grep -v /|tail -1 | awk '{print $(NF)}'`
+
