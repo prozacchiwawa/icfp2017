@@ -17,15 +17,15 @@ Opening o;
 void termination_handler(int signum) {
     Opening q;
     
+    std::cerr << "Caught " << signum << std::endl;
     if (signum != SIGUSR1) {
         exit(1);
     }
-    if (o.ot == SetupOp) {
-        q.setup.punter = o.setup.punter;
-        q.setup.punters = o.setup.punters;
-        q.setup.map = o.setup.map;
-        q.setup.moves = o.setup.moves;
-    } else {
+    q.setup.punter = o.setup.punter;
+    q.setup.punters = o.setup.punters;
+    q.setup.map = o.setup.map;
+    q.setup.moves = o.setup.moves;
+    if (o.ot != SetupOp) {
         auto take_move = o.run(true);
         if (take_move.moveType == Claim) {
             o.addMove
@@ -36,6 +36,7 @@ void termination_handler(int signum) {
         std::cout << take_move << "\n";
     }
 
+    std::cerr << "punter " << q.setup.punter << " punters " << q.setup.punters << "\n";
     writeEncodedSetup(std::cout, q);
     std::cout << "\n";
     exit(0);
@@ -54,6 +55,7 @@ int main() {
     std::cin >> o;
     if (o.ot == SetupOp) {
         o.setupFinalize();
+        //sleep(11); // stall here to test signal handler
     } else {
         // Only make a move during the main loop, not during setup
         readEncodedSetup(std::cin, o);
@@ -64,6 +66,7 @@ int main() {
                  take_move.claimMove.source,
                  take_move.claimMove.target);
         }
+        //sleep(2); // stall here to test signal handler
         std::cout << take_move << "\n";
     }
 
