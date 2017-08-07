@@ -11,7 +11,7 @@ LIBS=-lboost_iostreams -lboost_system -lz
 
 all: bin/main bin/graphio bin/test_score_eval bin/testgame bin/moveio bin/testmap bin/fightgame bin/testdandelion
 
-DBG_FLAGS=-pg
+DBG_FLAGS=-pg -g
 
 %.o:: %.c
 	gcc $(DBG_FLAGS) -c -o $@ $<

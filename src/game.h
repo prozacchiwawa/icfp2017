@@ -6,6 +6,8 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filter/zlib.hpp>
 
 #include "types.h"
 #include "ourgraph.h"
@@ -217,7 +219,11 @@ std::istream &readEncodedSetup(std::istream &instr, Opening &s) {
         return instr;
     }
     auto str = frombase64(r);
-    std::istringstream iss(str);
+    std::istringstream iss_compressed(str);
+    boost::iostreams::filtering_streambuf<boost::iostreams::input> in;
+    in.push(boost::iostreams::zlib_decompressor());
+    in.push(iss_compressed);
+    auto iss = std::istream(&in);
     readSetup(iss, s);
     iss >> s.setup.weights;
     s.setup.planner.read(iss, s);
@@ -239,9 +245,16 @@ std::string tobase64(const std::string &ostr) {
 // Local precomputation should follow writeSetup
 std::ostream &writeEncodedSetup(std::ostream &oustr, const Opening &o) {
     std::ostringstream oss;
-    writeSetup(oss, o);
-    oss << o.setup.weights;
-    o.setup.planner.write(oss, o);
+    {
+        boost::iostreams::filtering_streambuf<boost::iostreams::output> out;
+        out.push(boost::iostreams::zlib_compressor());
+        out.push(oss);
+        auto outcompress = std::ostream(&out);
+        writeSetup(outcompress, o);
+        outcompress << o.setup.weights;
+        o.setup.planner.write(outcompress, o);
+        std::flush(outcompress);
+    }
     auto ostr = oss.str();
     return oustr << tobase64(ostr);
 }
