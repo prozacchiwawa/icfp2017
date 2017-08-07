@@ -42,12 +42,13 @@ sudo apt-get install python-pip
 sudo pip install grof2dot
 
 bin/fightgame 0 1 maps/edinburgh-sparse.crk 
+gprof | c++filt | gprof2dot | dot -Tpng -o output.png
 
-gprof bin/fightgame  | c++filt | gprof2dot | dot -Tpng -o output.png
+or
+bin/main
+gprof | c++filt | gprof2dot | dot -Tpng -o output.png
 
-gprof bin/main  | c++filt | gprof2dot | dot -Tpng -o output.png
-
-
-time (gprof --min-count 100000 bin/main  |  gprof2dot -s -e 99.9 -n 99.9 | dot -Tps -o output.ps)
+bin/main
+time (gprof --min-count 100000  |  gprof2dot -s -e 99.9 -n 99.9 | dot -Tps -o output.ps)
 
 
