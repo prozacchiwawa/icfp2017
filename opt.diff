@@ -1,0 +1,134 @@
+diff --git a/src/plan.cpp b/src/plan.cpp
+index 5545f1e..2594b20 100644
+--- a/src/plan.cpp
++++ b/src/plan.cpp
+@@ -100,10 +100,13 @@ DandelionPlan::DandelionPlan
+ 
+     iss >> mine >> currentCostVal >> scoreWhenCompleteVal;
+     iss >> r;
++    vertices.clear();
+     edges.clear();
+     while (r != "end") {
+         std::string s;
+         iss >> s;
++        vertices.insert(r);
++        vertices.insert(s);
+         edges.insert(make_ordered_pair(r, s));
+         iss >> r;
+     }
+@@ -242,8 +245,13 @@ double DandelionPlan::computeScore(PID punter, SiteID mine, const Graph &player_
+     auto &d = o.setup.map;
+     auto &player_vertices = d.player_vertices[punter];
+     auto &orig_graph = d.played[punter];
++    auto vertices = player_vertices;
++    for (auto &it : edges) {
++        vertices.insert(it.first);
++        vertices.insert(it.second);
++    }
+     auto figure_score = 
+-        score_player_map(punter, o.setup.weights, o.setup.map.mines, player_graph, d);
++        score_player_map(punter, o.setup.weights, o.setup.map.mines, vertices, player_graph, d, true);
+     return figure_score - player_score;
+ }
+ 
+diff --git a/src/plan.h b/src/plan.h
+index 3346457..f7eec0a 100644
+--- a/src/plan.h
++++ b/src/plan.h
+@@ -101,6 +101,7 @@ private:
+ 
+     PID punter;
+     std::string mine;
++    std::set<SiteID> vertices;
+     std::set<std::pair<SiteID, SiteID> > edges;
+     int currentCostVal;
+     double scoreWhenCompleteVal;
+diff --git a/src/score_eval.cpp b/src/score_eval.cpp
+index bd04a5a..59bef7e 100644
+--- a/src/score_eval.cpp
++++ b/src/score_eval.cpp
+@@ -66,7 +66,8 @@ uint64_t score_one_mine
+  const std::set<SiteID> &player_vertices,
+  const std::map<std::string, std::vector<uint32_t> > &weights,
+  const Graph &player,
+- const DumbMap &d) {
++ const DumbMap &d,
++ bool assume_connected) {
+     uint64_t score = 0;
+     std::vector<int> distances;
+ 
+@@ -78,18 +79,27 @@ uint64_t score_one_mine
+ 
+     distances.assign
+         (d.vertices_by_name.size(), std::numeric_limits<int>::max());
++    
++    if (assume_connected) {
++        for (auto &it : player_vertices) {
++            distances[d.vtx_idx(it)] = 1;
++        }
++    }
++    
+     auto v0_name = v0.first;
+     auto world_distances_it = weights.find(v0_name);
+     if (world_distances_it == weights.end()) {
+         throw std::exception();
+     }
+     auto &world_distances = world_distances_it->second;
+-    
+-    // State for Dijkstra
+-    // Compute shortest paths from each mine to all other vertices,
+-    // and store the output in predecessors and distances
+-    boost::dijkstra_shortest_paths
+-        (player, v0.second, boost::distance_map(&distances[0]));
++
++    if (!assume_connected) {
++        // State for Dijkstra
++        // Compute shortest paths from each mine to all other vertices,
++        // and store the output in predecessors and distances
++        boost::dijkstra_shortest_paths
++            (player, v0.second, boost::distance_map(&distances[0]));
++    }
+ 
+     for (int i = 0; i < distances.size(); i++) {
+         if (distances[i] != std::numeric_limits<int>::max()) {
+@@ -100,14 +110,13 @@ uint64_t score_one_mine
+     return score;
+ }
+ 
+-uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<uint32_t> > &weights, const std::set<SiteID> &mines, const Graph &player_graph, const DumbMap& d) {
++uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<uint32_t> > &weights, const std::set<SiteID> &mines, const std::set<SiteID> &player_vertices, const Graph &player_graph, const DumbMap& d, bool assume_connected) {
+     uint64_t score = 0;
+ 
+     std::set<SiteID>::iterator it;
+-    auto &player_vertices = d.player_vertices[punter];
+ 
+     for (it = mines.begin(); it != mines.end(); ++it) {
+-        score += score_one_mine(*it, player_vertices, weights, player_graph, d);
++        score += score_one_mine(*it, player_vertices, weights, player_graph, d, assume_connected);
+     }
+     return score;
+ }
+@@ -115,6 +124,7 @@ uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<ui
+ uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<uint32_t> > &weights, const DumbMap& d) {
+     auto &player_graph = d.played[punter];
+     auto &mines = d.player_mines[punter];
+-    return score_player_map(punter, weights, mines, player_graph, d);
++    auto &player_vertices = d.player_vertices[punter];
++    return score_player_map(punter, weights, mines, player_vertices, player_graph, d);
+ }
+  
+diff --git a/src/score_eval.h b/src/score_eval.h
+index ee93e67..3ecbd8c 100644
+--- a/src/score_eval.h
++++ b/src/score_eval.h
+@@ -10,8 +10,8 @@ typedef boost::iterator_property_map < Vertex*, IndexMap, Vertex, Vertex& > Pred
+ typedef boost::iterator_property_map < Weight*, IndexMap, Weight, Weight& > DistanceMap;
+ typedef boost::iterator_property_map < Weight*, IndexMap, Weight, Weight& > WeightMap;
+  
+-uint64_t score_one_mine(const SiteID &mine, const std::set<SiteID> &player_vertices, const std::map<std::string, std::vector<uint32_t> > &weights, const Graph &player, const DumbMap &world);
+-uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<uint32_t> > &weights, const std::set<SiteID> &player_mines, const Graph &player_graph, const DumbMap& d);
++uint64_t score_one_mine(const SiteID &mine, const std::set<SiteID> &player_vertices, const std::map<std::string, std::vector<uint32_t> > &weights, const Graph &player, const DumbMap &world, bool assume_connected = false);
++uint64_t score_player_map(PID punter, const std::map<std::string, std::vector<uint32_t> > &weights, const std::set<SiteID> &player_mines, const std::set<SiteID> &player_vertices, const Graph &player_graph, const DumbMap& d, bool assume_connected = false);
+ uint64_t score_player_map(PID player, const std::map<std::string, std::vector<uint32_t> > &weights, const DumbMap &world);
+ 
+ #endif //SCORE_EVAL_H
