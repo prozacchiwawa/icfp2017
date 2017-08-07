@@ -4,6 +4,7 @@
 import os
 import sys
 import json
+from math import sqrt
 import hashlib
 import BaseHTTPServer
 
@@ -15,8 +16,9 @@ class IndexRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def doindex(self,pagenum):
         md5 = hashlib.md5()
         alldata[pagenum]['page'] = pagenum
+        alldata[pagenum]['size'] = 100 * sqrt(len(alldata[pagenum]['sites']))
         alldata[pagenum]['pages'] = len(alldata)
-        index_data = open('render/index.html').read() % json.dumps(alldata[pagenum])
+        index_data = open('tools/render/index.html').read() % json.dumps(alldata[pagenum])
         md5.update(index_data)
         self.send_response(200)
         self.send_header('content-type', 'text/html; charset=utf-8')
@@ -34,7 +36,7 @@ class IndexRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             print ('page %s' % pagenum)
             self.doindex(pagenum)
         elif self.path.endswith('.js'):
-            f = open(os.path.join(os.getcwd(), 'render', self.path[1:])).read()
+            f = open(os.path.join(os.getcwd(), 'tools/render', self.path[1:])).read()
             self.wfile.write(f)
             self.wfile.close()
         else:
@@ -120,7 +122,7 @@ if __name__ == '__main__':
         data = interpret_setup(stanzas[0][1:])
         alldata = [data]
         for stanza in stanzas[1:]:
-            data = interpret_move(stanza[2:], json.loads(json.dumps(data)))
+            data = interpret_move(stanza[2:], {'used':{}, 'mines':data['mines'], 'rivers':data['rivers'], 'sites':data['sites']})
             alldata += [data]
     else:
         process = [""]
@@ -144,7 +146,7 @@ if __name__ == '__main__':
                 key = 'move'
                 if 'stop' in msg:
                     key = 'stop'
-                data = json.loads(json.dumps(data))
+                data = {'used':{}, 'mines':data['mines'], 'rivers':data['rivers'], 'sites':data['sites']}
                 if not 'used' in data:
                     data['used'] = {}
                 for m in msg[key]['moves']:
@@ -154,7 +156,7 @@ if __name__ == '__main__':
                 alldata = alldata + [data]
                 print 'pages %s' % len(alldata)
             elif 'claim' in msg:
-                data = json.loads(json.dumps(data))
+                data = {'used':{}, 'mines':data['mines'], 'rivers':data['rivers'], 'sites':data['sites']}
                 if not 'used' in data:
                     data['used'] = {}
                 c = msg['claim']

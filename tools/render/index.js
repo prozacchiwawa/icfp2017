@@ -40,6 +40,12 @@ window.onload = function() {
         document.location = '/' + (data.page+1) + '.html';
     });
     console.log('start dracula');
+
+    var canvas = document.getElementById('canvas');
+    console.log('canvas size',data.size);
+    canvas.width = data.size;
+    canvas.height = data.size;
+    
     var g = new Graph();
  
     for (var i = 0; i < data.mines.length; i++) {
@@ -77,7 +83,7 @@ window.onload = function() {
     var layouter = new Graph.Layout.Spring(g);
     layouter.layout();
     
-    var renderer = new Graph.Renderer.Raphael('canvas', g, 800, 600);
+    var renderer = new Graph.Renderer.Raphael('canvas', g, data.size, data.size);
     renderer.draw();
     console.log('stop dracula');
 }
