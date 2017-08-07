@@ -1,0 +1,8 @@
+
+
+Timeout: SIGUSR1 = fast, quick choice
+
+gprof
+make maps to test plan generation
+remove self-connected edges from planner moves
+

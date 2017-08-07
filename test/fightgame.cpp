@@ -6,11 +6,12 @@
 
 int main(int argc, char **argv) {
     if (argc < 4) {
-        std::cerr << "usage: fightgame <id> <out-of> map.crk\n";
+        std::cerr << "usage: fightgame <id> <out-of> map.crk <max_moves>\n";
         return 1;
     }
 
     PID id;
+    int max_moves = -1;
     int numPlayers;
     std::istringstream iss_id(argv[1]);
     std::istringstream iss_outof(argv[2]);
@@ -22,6 +23,11 @@ int main(int argc, char **argv) {
          std::istreambuf_iterator<char>());
     std::string continue_game = start_game;
 
+    if (argc > 4) {
+      std::istringstream max_moves_str(argv[4]);
+      max_moves_str >> max_moves;
+    }
+
     int numEdges = -1;
 
     std::map<int, std::string> continue_state;
@@ -29,7 +35,7 @@ int main(int argc, char **argv) {
 
     std::cout << "continue " << continue_game << "\n";
 
-    for (int i = 0; i != numEdges; i++) {
+    for (int i = 0; i != numEdges && i != max_moves; i++) {
         auto whichPlayer = i % numPlayers;
         std::istringstream begin_game(continue_game);
         {
