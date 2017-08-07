@@ -21,44 +21,33 @@ def decode(player_commands, player_data):
 
     return None
 
-
-
 '''
 Whoops - don't need this
 
+def decodeStart(player_commands, player_data):
     state = ""
     substate = ""
     msg = {"sites" :[], "rivers":[], "mines":[]}
     assert player_commands[0] == "setup"
-    for i in range(len(player_commands)):
+    filling = 0
+    filling_list['sites', 'rivers', 'mines']
+    i = 3
+    while i < len(player_commands):
         tok = player_commands[i]
-        if tok == "setup": assert state == ""; state = "setup"; substate = "id"
-        if tok == "rivers": assert state == ""; state = "rivers"
-        if tok == "mines": assert state == ""; state = "mines"
-        if tok == "end": state = ""
-
-        if state == "setup":
-            if substate == "id":
-                
-            msg[state].append(tok)
-
-        if state == "rivers":
-            
-
-    msg = ""
-    msg += "setup %s %s " % (iam, players)
-    for x in json_map['sites']:
-        msg += str(x['id']) + " "
-    msg += "end "
-    for x in json_map['rivers']:
-        msg += "%s %s " % (x['source'],x['target'])
-    msg += "end "
-    for x in json_map['mines']:
-        msg += str(x) + " "
-    msg += "end " # End mines
-    msg += "end " # End initial moves
-    return msg
-
+        if tok == 'end':
+            filling += 1
+        else:
+            key = filling_list[filling]
+            if key == 'sites':
+                msg['sites'] += [{'id':int(tok)}]
+            elif key == 'rivers':
+                source = int(tok)
+                i += 1
+                target = int(player_commands[i])
+                msg['rivers'] += [{'source':source, 'target':target}]
+            elif key == 'mines':
+                msg['mines'] += int(player_commands[i])
+        i += 1
 
 if __name__ == '__main__':
     iam = sys.argv[1]
