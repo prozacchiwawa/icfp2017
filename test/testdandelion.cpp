@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "ourgraph.h"
+#include "score_eval.h"
 #include "game.h"
 
 int main(int argc, char **argv) {
@@ -20,6 +21,8 @@ int main(int argc, char **argv) {
     Opening o;
     begin_game >> o;
     o.setupFinalize();
+
+    auto player_score = score_player_map(o.setup.punter, o.setup.weights, o.setup.map);
     
     if (o.ot == SetupOp) {
         numMoves = o.setup.map.edge_count;
@@ -37,7 +40,7 @@ int main(int argc, char **argv) {
                     for (auto &gtm : dplan) {
                         std::cout << gtm << "\n";
                     }
-                    DandelionPlan dp(0, d_at, mine_it, dplan, o);
+                    DandelionPlan dp(0, d_at, player_score, mine_it, dplan, o);
                     std::ostringstream oss;
                     oss << dp;
                     std::cout
