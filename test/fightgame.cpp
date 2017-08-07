@@ -27,6 +27,8 @@ int main(int argc, char **argv) {
     std::map<int, std::string> continue_state;
     std::map<int, Move> moves_since_last;
 
+    std::cout << "continue " << continue_game << "\n";
+
     for (int i = 0; i != numEdges; i++) {
         auto whichPlayer = i % numPlayers;
         std::istringstream begin_game(continue_game);
@@ -69,7 +71,7 @@ int main(int argc, char **argv) {
                 writeSetup(game_oss, o);
                 game_oss << "\n";
                 for (auto &it : moves_since_last) {
-                    if (it.first != nextPlayer) {
+                    if (it.first != nextPlayer || numPlayers == 1) {
                         game_oss << it.second << " ";
                     }
                 }
@@ -77,7 +79,7 @@ int main(int argc, char **argv) {
             } else {
                 game_oss << "move ";
                 for (auto &it : moves_since_last) {
-                    if (it.first != nextPlayer) {
+                    if (it.first != nextPlayer || numPlayers == 1) {
                         game_oss << it.second << " ";
                     }
                 }
