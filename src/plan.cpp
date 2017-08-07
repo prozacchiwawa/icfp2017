@@ -248,7 +248,6 @@ double DandelionPlan::computeScore(PID punter, SiteID mine, const Graph &player_
         score_player_map(punter, o.setup.weights, o.setup.map.mines, player_graph, d);
     auto player_score =
         score_player_map(punter, o.setup.weights, d);
-    std::cerr << "scoring dandelion " << mine << " with " << edges.size() << " edges " << " figure " << figure_score << " vs " << player_score << "\n";
     return figure_score - player_score;
 }
 
@@ -282,13 +281,6 @@ void TestPlan::construct() {
             edges.insert(make_ordered_pair(a.str(), b.str()));
         }
     }
-
-    std::cerr << "test plan cost is " << cost_max << std::endl;
-    std::cerr << "edges.size() is " << edges.size() << std::endl;
-    cost_max = edges.size();
-    std::cerr << "Setting test plan cost to " << cost_max << std::endl;
-
-    std::cerr << "TestPlan::construct() my address is " << (void*) this << std::endl;
 }
 
 TestPlan::TestPlan(PID punter) : punter(punter) {
@@ -365,7 +357,6 @@ void Planner::initPlans(Opening &o) {
     while (!queue_copy.empty()) {
         auto e = queue_copy.top();
         queue_copy.pop();
-        std::cerr << "plan cost:" << " goalScore:" << e->scoreWhenComplete() << " " << e->name() << " " << e->serialize() << "\n";
     }
 }
 
@@ -419,7 +410,6 @@ void Planner::addMove(PID punter, const std::string &a, const std::string &b, Op
         plans.pop();
         auto pair = make_ordered_pair(a,b);
         auto eliminated = p->moveEliminates(punter, pair, o);
-        std::cerr << "move " << a << "," << b << " eliminates? " << eliminated << " from " << p->name() << "\n";
         if (punter == o.setup.punter) {
             p->addMove(punter, pair, o);
         }

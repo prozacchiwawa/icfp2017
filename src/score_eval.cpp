@@ -91,14 +91,6 @@ uint64_t score_one_mine
     boost::dijkstra_shortest_paths
         (player, v0.second, boost::distance_map(&distances[0]));
 
-    std::cerr << "distances:\n";
-    for (int i = 0; i < distances.size(); i++) {
-        std::cerr << distances[i] << "\n";
-        if (distances[i] != std::numeric_limits<int>::max()) {
-            score += world_distances[i] * world_distances[i];
-        }
-    }
-
     return score;
 }
 

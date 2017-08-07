@@ -65,7 +65,6 @@ int main() {
                  take_move.claimMove.target);
         }
         std::cout << take_move << "\n";
-
     }
 
     // Always send state

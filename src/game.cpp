@@ -16,12 +16,14 @@ Move Opening::run(bool panic) {
             std::cerr << "have-plan " << plan->scoreWhenComplete() << " " << plan->name() << " " << plan->serialize() << "\n";
             
         }
+#if 0
         auto queue_copy = setup.planner.plans;
         while (!queue_copy.empty()) {
             auto e = queue_copy.top();
             queue_copy.pop();
             std::cerr << "plan " << e->scoreWhenComplete() << " " << e->name() << " " << e->serialize() << "\n";
         }
+ #endif
         
         auto suggested = plan ? plan->recommendMoves() : std::vector<Edge>();
         std::transform(suggested.begin(), suggested.end(), std::back_inserter(scores), [&] (const Edge &e) {
@@ -81,21 +83,21 @@ void Opening::setupFinalize() {
         Graph::out_edge_iterator oe, oe_end;
         boost::tie (oe,oe_end) = boost::out_edges(vtx, setup.map.world);
         boost::tie (ie,ie_end) = boost::in_edges(vtx, setup.map.world);
-        std::cerr << "Vertex " << setup.map.vertices_by_number[vtx] << ": ";
+        //std::cerr << "Vertex " << setup.map.vertices_by_number[vtx] << ": ";
         uint64_t num_edges = 0;
         for (; ie != ie_end; ie++) {
           auto s = setup.map.vertices_by_number[source(*ie, setup.map.world)];
           auto t = setup.map.vertices_by_number[target(*ie, setup.map.world)];
-          std::cerr << "(" << s << "," << t << ") ";
+          //std::cerr << "(" << s << "," << t << ") ";
           num_edges++;
         }
         for (; oe != oe_end; oe++) {
           auto s = setup.map.vertices_by_number[source(*oe, setup.map.world)];
           auto t = setup.map.vertices_by_number[target(*oe, setup.map.world)];
-          std::cerr << "(" << s << "," << t << ") ";
+          //std::cerr << "(" << s << "," << t << ") ";
           num_edges++;
         }
-        std::cerr << "[" << num_edges << " edges]" << std::endl;
+        //std::cerr << "[" << num_edges << " edges]" << std::endl;
         setup.branches[vtx_it.first] = num_edges;
     }
 }
