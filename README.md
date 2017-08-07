@@ -48,6 +48,6 @@ gprof bin/fightgame  | c++filt | gprof2dot | dot -Tpng -o output.png
 gprof bin/main  | c++filt | gprof2dot | dot -Tpng -o output.png
 
 
-time (gprof bin/main  |  gprof2dot -s -e 99.9 -n 99.9 | dot -Tps -o output.ps)
+time (gprof --min-count 100000 bin/main  |  gprof2dot -s -e 99.9 -n 99.9 | dot -Tps -o output.ps)
 
 
