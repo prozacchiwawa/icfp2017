@@ -44,6 +44,7 @@ double NeighborhoodSizeClassifier::classify(PID us, const Edge &e, const DumbMap
 DandelionPlan::DandelionPlan
 (PID punter,
  SiteID v0,
+ double player_score,
  const SiteID &mine,
  const std::vector<SiteID> &path,
  const Opening &world) :
@@ -73,7 +74,7 @@ DandelionPlan::DandelionPlan
             }
         }
         
-        score = computeScore(punter, mine, player_graph, world);
+        score = computeScore(punter, mine, player_graph, player_score, world);
 
         if (best_score == -1 || score > best_score) {
             edges = std::move(new_edges);
@@ -237,14 +238,12 @@ void DandelionPlan::addMove(PID punter, const std::pair<SiteID, SiteID> &move, c
     }
 }
 
-double DandelionPlan::computeScore(PID punter, SiteID mine, const Graph &player_graph, const Opening &o) {
+double DandelionPlan::computeScore(PID punter, SiteID mine, const Graph &player_graph, double player_score, const Opening &o) {
     auto &d = o.setup.map;
     auto &player_vertices = d.player_vertices[punter];
     auto &orig_graph = d.played[punter];
     auto figure_score = 
         score_player_map(punter, o.setup.weights, o.setup.map.mines, player_graph, d);
-    auto player_score =
-        score_player_map(punter, o.setup.weights, d);
     return figure_score - player_score;
 }
 
@@ -333,6 +332,9 @@ std::string TestPlan::serialize() const {
 
 void Planner::initPlans(Opening &o) {
     std::map<SiteID, std::set<SiteID> > whereToBuild;
+    auto &d = o.setup.map;
+    auto player_score = score_player_map(o.setup.punter, o.setup.weights, d);
+    
     for (auto &mine_it : o.setup.map.mines) {
         auto &build_ref = whereToBuild[mine_it];
         o.generateDandelionLine(mine_it, build_ref);
@@ -340,7 +342,7 @@ void Planner::initPlans(Opening &o) {
             std::vector<SiteID> dplan;
             o.gradientToMine(mine_it, d_at, dplan);
             auto dp = std::make_shared<DandelionPlan>
-                (o.setup.punter, d_at, mine_it, dplan, o);
+                (o.setup.punter, d_at, player_score, mine_it, dplan, o);
             plans.push_back(dp);
         }
     }

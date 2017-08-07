@@ -78,6 +78,7 @@ public:
     DandelionPlan
         (PID punter,
          SiteID v0,
+         double player_score,
          const SiteID &mine,
          const std::vector<SiteID> &path,
          const Opening &world);
@@ -96,7 +97,7 @@ public:
 private:
     std::set<std::pair<SiteID, SiteID> >
         generateRecommendedMoves(const SiteID &v0, const SiteID &mine, const Opening &o);
-    double computeScore(PID punter, SiteID mine, const Graph &player_graph, const Opening &o);
+    double computeScore(PID punter, SiteID mine, const Graph &player_graph, double player_score, const Opening &o);
 
     PID punter;
     std::string mine;
