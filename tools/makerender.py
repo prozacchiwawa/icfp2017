@@ -122,7 +122,7 @@ if __name__ == '__main__':
         data = interpret_setup(stanzas[0][1:])
         alldata = [data]
         for stanza in stanzas[1:]:
-            data = interpret_move(stanza[2:], {'used':{}, 'mines':data['mines'], 'rivers':data['rivers'], 'sites':data['sites']})
+            data = interpret_move(stanza[2:], {'used':json.loads(json.dumps(data['used'])), 'mines':data['mines'], 'rivers':data['rivers'], 'sites':data['sites']})
             alldata += [data]
     else:
         process = [""]
@@ -146,7 +146,7 @@ if __name__ == '__main__':
                 key = 'move'
                 if 'stop' in msg:
                     key = 'stop'
-                data = {'used':{}, 'mines':data['mines'], 'rivers':data['rivers'], 'sites':data['sites']}
+                data = {'used':json.loads(json.dumps(data['used'])), 'mines':data['mines'], 'rivers':data['rivers'], 'sites':data['sites']}
                 if not 'used' in data:
                     data['used'] = {}
                 for m in msg[key]['moves']:
@@ -156,7 +156,7 @@ if __name__ == '__main__':
                 alldata = alldata + [data]
                 print 'pages %s' % len(alldata)
             elif 'claim' in msg:
-                data = {'used':{}, 'mines':data['mines'], 'rivers':data['rivers'], 'sites':data['sites']}
+                data = {'used':json.loads(json.dumps(data['used'])), 'mines':data['mines'], 'rivers':data['rivers'], 'sites':data['sites']}
                 if not 'used' in data:
                     data['used'] = {}
                 c = msg['claim']
