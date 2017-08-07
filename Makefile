@@ -4,14 +4,14 @@ CSRC=base64/base64.c
 ALL_OBJS=$(subst .cpp,.o,$(SRCS)) $(subst .c,.o,$(CSRC))
 MAINS=src/main.o test/test_score_eval.o
 OBJS=$(filter-out $(MAINS),$(ALL_OBJS)) # remove objs with a "main"
-CC=clang-3.9
-CXX=clang++-3.9
+CC=gcc -O3 -I$(HOME)/.local/share/boost_1_64_0
+CXX=g++ -O3 -I$(HOME)/.local/share/boost_1_64_0
 FLAGS=# -ferror-limit=1
-LIBS=-lboost_iostreams -lboost_system -lz
+LIBS=-Llib -lboost_iostreams -lboost_system -lz #-lboost_iostreams -lboost_system -lz
 
 all: bin/main bin/graphio bin/test_score_eval bin/testgame bin/moveio bin/testmap bin/fightgame bin/testdandelion
 
-DBG_FLAGS=-pg -g -O3
+DBG_FLAGS=
 
 %.o:: %.c
 	gcc $(DBG_FLAGS) -c -o $@ $<
