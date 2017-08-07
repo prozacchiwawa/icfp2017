@@ -2,6 +2,7 @@
 
 #include <set>
 #include <string>
+#include <deque>
 #include <queue>
 #include <memory>
 #include "types.h"
@@ -139,9 +140,6 @@ struct GreaterScore {
 
 class Planner {
 public:
-    using PQ = 
-        std::priority_queue<std::shared_ptr<BuildPlan>, std::vector<std::shared_ptr<BuildPlan> >, GreaterScore >;
-    
     void initPlans(Opening &op);
     std::shared_ptr<BuildPlan> current() const;
     void addMove(PID punter, const std::string &a, const std::string &b, Opening &o);
@@ -149,5 +147,5 @@ public:
     std::istream &read(std::istream &instr, const Opening &o);
     std::ostream &write(std::ostream &oustr, const Opening &o) const;
 
-    PQ plans;
+    std::deque<std::shared_ptr<BuildPlan> > plans;
 };

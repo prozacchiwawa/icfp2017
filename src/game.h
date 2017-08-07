@@ -17,8 +17,12 @@ extern "C" {
 
 struct ClaimMove {
     SiteID source, target;
+    ClaimMove() { }
+    ClaimMove(const SiteID &source, const SiteID &target) : source(source), target(target) {
+        assert((source == "" && target == "") || (source != target));
+    }
 
-    std::pair<SiteID,SiteID> pair() const { return std::make_pair(source, target); }
+    std::pair<SiteID,SiteID> pair() const { return make_ordered_pair(source, target); }
     
     bool operator < (const ClaimMove &other) const {
         return pair() < other.pair();

@@ -341,7 +341,7 @@ void Planner::initPlans(Opening &o) {
             o.gradientToMine(mine_it, d_at, dplan);
             auto dp = std::make_shared<DandelionPlan>
                 (o.setup.punter, d_at, mine_it, dplan, o);
-            plans.push(dp);
+            plans.push_back(dp);
         }
     }
 
@@ -349,35 +349,31 @@ void Planner::initPlans(Opening &o) {
     auto plan = std::make_shared<TestPlan>(o.setup.punter);
     plans.push(plan);
 #endif
-    
-    auto queue_copy = o.setup.planner.plans;
-    while (!queue_copy.empty()) {
-        auto e = queue_copy.top();
-        queue_copy.pop();
-    }
+
+    std::sort(plans.begin(), plans.end(), GreaterScore());
 }
 
 std::shared_ptr<BuildPlan> Planner::current() const {
     if (plans.empty()) {
         return std::shared_ptr<BuildPlan>();
     } else {
-        return plans.top();
+        return plans.front();
     }
 }
 
 std::istream &Planner::read(std::istream &instr, const Opening &o) {
     std::string ty;
     instr >> ty;
-    plans = Planner::PQ();
+    plans.clear();
     while (ty != "end") {
         if (ty == "dandelion") {
             instr >> ty;
             auto dp = std::make_shared<DandelionPlan>(ty, o);
-            plans.push(dp);
+            plans.push_back(dp);
         } else if (ty == "test") {
             instr >> ty;
             auto dp = std::make_shared<TestPlan>(ty, o);
-            plans.push(dp);
+            plans.push_back(dp);
         } else {
             std::string enc;
             instr >> enc;
@@ -390,10 +386,8 @@ std::istream &Planner::read(std::istream &instr, const Opening &o) {
 }
 
 std::ostream &Planner::write(std::ostream &oustr, const Opening &o) const {
-    auto planner_copy = plans;
-    while (!planner_copy.empty()) {
-        auto p = planner_copy.top();
-        planner_copy.pop();
+    for (auto i = 0; i < plans.size(); i++) {
+        auto &p = plans[i];
         oustr << p->name() << " " << p->serialize() << "\n";
     }
     oustr << "end\n";
@@ -401,18 +395,16 @@ std::ostream &Planner::write(std::ostream &oustr, const Opening &o) const {
 }
 
 void Planner::addMove(PID punter, const std::string &a, const std::string &b, Opening &o) {
-    Planner::PQ q;
-    while (!plans.empty()) {
-        auto p = plans.top();
-        plans.pop();
+    for (auto i = 0; i < plans.size(); i++) {
+        auto &p = plans[i];
         auto pair = make_ordered_pair(a,b);
         auto eliminated = p->moveEliminates(punter, pair, o);
         if (punter == o.setup.punter) {
             p->addMove(punter, pair, o);
         }
-        if (!eliminated) {
-            q.push(p);
+        if (eliminated) {
+            plans.erase(plans.begin() + i);
+            i--;
         }
     }
-    plans = q;
 }

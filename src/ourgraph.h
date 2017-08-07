@@ -27,6 +27,7 @@ using Vertex = boost::graph_traits < Graph >::vertex_descriptor;
 
 template <class A>
 std::pair<A,A> make_ordered_pair(const A &a, const A &b) {
+    assert(a != b);
     if (a < b) { return std::make_pair(a, b); }
     else { return std::make_pair(b, a); }
 }
