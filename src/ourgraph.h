@@ -33,6 +33,7 @@ std::pair<A,A> make_ordered_pair(const A &a, const A &b) {
 
 struct DumbMap {
     Graph world;
+    Graph world_vertices_only;
 
     std::vector<Graph> played;
     std::set<SiteID> mines;
@@ -120,7 +121,7 @@ struct DumbMap {
     void setPunters(int all) {
         player_mines.resize(all);
         player_vertices.resize(all);
-        played.resize(all);
+        played.assign(all, world_vertices_only);
     }
 
     void addMove(PID punter, const std::string &a, const std::string &b) {
@@ -179,6 +180,9 @@ std::istream &operator >> (std::istream &instr, DumbMap &m) {
             break;
         }
     }
+
+    m.world_vertices_only = m.world;
+    
     while (true) {
         instr >> r;
         if (r != "end") {

@@ -57,6 +57,12 @@ DandelionPlan::DandelionPlan
     // What if we run out of edges?
     while (at <= path.size()) {
         auto player_graph = pg;
+        auto world_vertices = boost::num_vertices(d.world);
+        std::cerr << "world.num_vertices " << world_vertices << "\n";
+        auto orig_vertices = boost::num_vertices(pg);
+        std::cerr << "o.num_vertices " << orig_vertices << "\n";
+        auto player_graph_vertices = boost::num_vertices(player_graph);
+        std::cerr << "pg.num_vertices " << player_graph_vertices << "\n";
         auto new_edges = generateRecommendedMoves(v0, mine, world);
         for (auto &e : new_edges) {
             auto a_it = d.vertices_by_name.find(e.first);
@@ -238,8 +244,12 @@ double DandelionPlan::computeScore(PID punter, SiteID mine, const Graph &player_
     auto &d = o.setup.map;
     auto &player_vertices = d.player_vertices[punter];
     auto &orig_graph = d.played[punter];
-    return score_player_map(punter, o.setup.weights, player_graph, d) -
-        score_player_map(punter, o.setup.weights, orig_graph, d);
+    auto figure_score = 
+        score_player_map(punter, o.setup.weights, o.setup.map.mines, player_graph, d);
+    auto player_score =
+        score_player_map(punter, o.setup.weights, d);
+    std::cerr << "scoring dandelion " << mine << " with " << edges.size() << " edges " << " figure " << figure_score << " vs " << player_score << "\n";
+    return figure_score - player_score;
 }
 
 std::ostream &operator << (std::ostream &oustr, const DandelionPlan &dp) {
@@ -333,7 +343,6 @@ std::string TestPlan::serialize() const {
 }
 
 void Planner::initPlans(Opening &o) {
-#if 0
     std::map<SiteID, std::set<SiteID> > whereToBuild;
     for (auto &mine_it : o.setup.map.mines) {
         auto &build_ref = whereToBuild[mine_it];
@@ -346,10 +355,11 @@ void Planner::initPlans(Opening &o) {
             plans.push(dp);
         }
     }
-#endif
-    
+
+#if 0
     auto plan = std::make_shared<TestPlan>(o.setup.punter);
     plans.push(plan);
+#endif
     
     auto queue_copy = o.setup.planner.plans;
     while (!queue_copy.empty()) {
