@@ -28,11 +28,13 @@ int main(int argc, char **argv) {
     std::map<int, Move> moves_since_last;
 
     for (int i = 0; i != numEdges; i++) {
+        auto whichPlayer = i % numPlayers;
         std::istringstream begin_game(continue_game);
         {
             Opening o;
             begin_game >> o;
             if (o.ot == SetupOp) {
+                o.setup.punter = whichPlayer;
                 o.setupFinalize();
                 auto edges = o.setup.map.getEdges();
                 numEdges = edges.size();
@@ -43,11 +45,9 @@ int main(int argc, char **argv) {
                 std::cerr << "begin_game: at " << streamAt << " next " << nextWord << "\n";
                 begin_game >> o.setup.moves;
             } else {
+                o.setup.punter = whichPlayer;
                 readEncodedSetup(begin_game, o);
             }
-
-            auto whichPlayer = i % numPlayers;
-            o.setup.punter = whichPlayer;
             
             auto take_move = o.run();
             if (take_move.moveType == Claim) {
