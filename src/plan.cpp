@@ -169,7 +169,7 @@ std::set<std::pair<SiteID, SiteID> > DandelionPlan::generateRecommendedMoves(con
         }
         lit_val = it;
     }
-    if (lit_val != "") {
+    if (lit_val != "" && lit_val != mine) {
         res.insert(make_ordered_pair(lit_val, mine));
     }
     for (auto ep = boost::in_edges(vtx, o.setup.map.world);
