@@ -15,11 +15,12 @@ extern "C" {
 Opening o;
 
 void termination_handler(int signum) {
+    Opening q;
+    
     if (signum != SIGUSR1) {
         exit(1);
     }
     if (o.ot == SetupOp) {
-        Opening q;
         q.setup.punter = o.setup.punter;
         q.setup.punters = o.setup.punters;
         q.setup.map = o.setup.map;
@@ -35,7 +36,7 @@ void termination_handler(int signum) {
         std::cout << take_move << "\n";
     }
 
-    writeEncodedSetup(std::cout, o);
+    writeEncodedSetup(std::cout, q);
     std::cout << "\n";
     exit(0);
 }
