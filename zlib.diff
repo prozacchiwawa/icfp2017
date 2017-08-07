@@ -1,0 +1,92 @@
+commit f3fc5bd74573d1c6b503d5d48812acd4c24ca7fc
+Author: arty <art.yerkes@gmail.com>
+Date:   Sat Aug 5 11:14:22 2017 -0700
+
+    zlib
+
+diff --git a/Makefile b/Makefile
+index 24af072..d4ceee9 100644
+--- a/Makefile
++++ b/Makefile
+@@ -6,8 +6,8 @@ MAINS=src/main.o test/test_score_eval.o
+ OBJS=$(filter-out $(MAINS),$(ALL_OBJS)) # remove objs with a "main"
+ CC=clang-3.9
+ CXX=clang++-3.9
+-B64=base64/base64.o
+ FLAGS=# -ferror-limit=1
++LIBS=-lboost_iostreams -lboost_system -lz
+ 
+ all: bin/main bin/graphio bin/test_score_eval bin/testgame bin/moveio bin/testmap bin/fightgame
+ 
+@@ -20,25 +20,25 @@ all: bin/main bin/graphio bin/test_score_eval bin/testgame bin/moveio bin/testma
+ 	$(CXX) -I./base64 -std=c++1z -g -c -o $@ $<
+ 
+ bin/main: src/main.o src/*.cpp $(OBJS) $(HDRS) 
+-	$(CXX) $(FLAGS) -I./base64 -std=c++1z -o $@ -g -lstdc++ $< $(OBJS) 
++	$(CXX) $(FLAGS) -I./base64 -std=c++1z -o $@ -g -lstdc++ $< $(OBJS) $(LIBS)
+ 
+ bin/graphio: test/graphio.cpp $(HDRS)
+-	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $<
++	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(OBJS) $(LIBS)
+ 
+ bin/moveio: test/moveio.cpp $(HDRS)
+-	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(OBJS)
++	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(OBJS) $(LIBS)
+ 
+ bin/test_score_eval: test/test_score_eval.cpp src/score_eval.o $(HDRS)
+-	$(CXX) $(FLAGS) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(OBJS)
++	$(CXX) $(FLAGS) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ $< $(OBJS) $(LIBS)
+ 
+ bin/testgame: test/testgame.cpp src/plan.o src/game.o $(HDRS)
+-	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/testgame.cpp src/plan.o src/game.o $(B64)
++	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/testgame.cpp $(OBJS) $(LIBS)
+ 
+ bin/testmap: test/testmap.cpp src/plan.o src/game.o $(HDRS)
+-	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/testmap.cpp src/plan.o src/game.o $(B64)
++	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/testmap.cpp $(OBJS) $(LIBS)
+ 
+ bin/fightgame: test/fightgame.cpp src/plan.o src/game.o src/score_eval.o $(HDRS)
+-	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/fightgame.cpp src/plan.o src/game.o src/score_eval.o $(B64)
++	$(CXX) -I./base64 -Isrc -std=c++1z -g -lstdc++ -o $@ test/fightgame.cpp $(OBJS) $(LIBS)
+ 
+ bin:
+ 	mkdir -p bin
+diff --git a/src/game.h b/src/game.h
+index 88f2589..87ab864 100644
+--- a/src/game.h
++++ b/src/game.h
+@@ -7,6 +7,8 @@
+ #include <iostream>
+ #include <algorithm>
+ 
++#include <boost/iostreams/filtering_streambuf.hpp>
++#include <boost/iostreams/filter/zlib.hpp>
+ #include "ourgraph.h"
+ #include "plan.h"
+ 
+@@ -190,12 +192,23 @@ std::istream &operator >> (std::istream &instr, OurState &s) {
+     std::vector<char> vec(bsize+1);
+     b64_decode(r.c_str(), r.size(), &vec[0]);
+     std::istringstream iss(std::string(&vec[0], bsize-1));
+-    return iss >> s.setup;
++    boost::iostreams::filtering_streambuf<boost::iostreams::input> in;
++    in.push(boost::iostreams::zlib_decompressor());
++    in.push(iss);
++    auto indecompress = std::istream(&in);
++    return indecompress >> s.setup;
+ }
+ 
+ std::ostream &operator << (std::ostream &oustr, const OurState &s) {
+     std::ostringstream oss;
+-    oss << s.setup;
++    {
++        boost::iostreams::filtering_streambuf<boost::iostreams::output> out;
++        out.push(boost::iostreams::zlib_compressor());
++        out.push(oss);
++        auto outcompress = std::ostream(&out);
++        outcompress << s.setup;
++        std::flush(outcompress);
++    }
+     auto ostr = oss.str();
+     size_t bsize = b64e_size(ostr.size());
+     std::vector<char> vec(bsize+1);
