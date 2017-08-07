@@ -41,11 +41,87 @@ class IndexRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write("dont know about " + self.path)
             self.wfile.close()
 
+def interpret_setup(player_commands):
+    state = ""
+    substate = ""
+    msg = {"sites" :[], "rivers":[], "mines":[], "used":{}}
+    assert player_commands[0] == "setup"
+    filling = 0
+    filling_list = ['sites', 'rivers', 'mines', 'moves', 'moves']
+    i = 3
+    while i < len(player_commands):
+        tok = player_commands[i]
+        if tok == 'end':
+            filling += 1
+        else:
+            key = filling_list[filling]
+            if key == 'sites':
+                msg['sites'] += [{'id':int(tok)}]
+            elif key == 'rivers':
+                source = int(tok)
+                i += 1
+                target = int(player_commands[i])
+                msg['rivers'] += [{'source':source, 'target':target}]
+            elif key == 'mines':
+                msg['mines'] += [int(player_commands[i])]
+            elif key == 'moves':
+                movetype = tok
+                if movetype == 'claim':
+                    i += 1
+                    punter = int(player_commands[i])
+                    i += 1
+                    source = int(player_commands[i])
+                    i += 1
+                    target = int(player_commands[i])
+                    if source < target:
+                        ukey = "%s,%s" % (source,target)
+                    else:
+                        ukey = "%s,%s" % (target,source)
+                    msg['used'][ukey] = punter
+                elif movetype == 'pass':
+                    i += 1
+        i += 1
+    return msg
+
+def interpret_move(player_commands, data):
+    i = 0
+    while player_commands[i] != 'end':
+        if player_commands[i] == 'claim':
+            i += 1
+            punter = int(player_commands[i])
+            i += 1
+            source = int(player_commands[i])
+            i += 1
+            target = int(player_commands[i])
+            if source < target:
+                ukey = "%s,%s" % (source,target)
+            else:
+                ukey = "%s,%s" % (target,source)
+            data['used'][ukey] = punter
+        i += 1
+    return data
+        
 if __name__ == '__main__':
     dataraw = open(sys.argv[1]).read()
     if dataraw[0] == '{':
         data = json.loads(dataraw)
         alldata = [data]
+    elif dataraw[0] == 'c':
+        stanzas = []
+        for ll in dataraw.split('\n'):
+            l = ll.strip()
+            if len(l) == 0:
+                continue
+            elif l.startswith('continue'):
+                stanzas += [l]
+            else:
+                stanzas[-1] += ' ' + l
+        stanzas = [x.strip().split() for x in stanzas]
+        data = interpret_setup(stanzas[0][1:])
+        alldata = [data]
+        for stanza in stanzas[1:]:
+            data = interpret_move(stanza[2:], json.loads(json.dumps(data)))
+            alldata += [data]
     else:
         process = [""]
         for ll in dataraw.split('\n'):
